@@ -179,7 +179,7 @@ define([
             }, {
                 commandsInOrder: {
                     get: function () {
-                        return this._commandsInOriginalOrder.filter(function (command) {
+                        return this._originalCommands.filter(function (command) {
                             // Make sure the element is still in the AppBar.
                             return this.appBarEl.contains(command);
                         }, this);
@@ -193,13 +193,13 @@ define([
                     _ElementUtilities.empty(this._secondaryCommands);
 
                     // Keep track of the order we receive the commands in.
-                    this._commandsInOriginalOrder = [];
+                    this._originalCommands = [];
 
                     // Layout commands
                     for (var i = 0, len = commands.length; i < len; i++) {
                         var command = this.sanitizeCommand(commands[i]);
 
-                        this._commandsInOriginalOrder.push(command.element);
+                        this._originalCommands.push(command.element);
 
                         if ("primary" === command.section || "global" === command.section) {
                             this._primaryCommands.appendChild(command._element);
@@ -469,6 +469,11 @@ define([
                 this._animationCompleteBound = this._animationComplete.bind(this);
                 this._positionToolBarBound = this._positionToolBar.bind(this);
             }, {
+                commandsInOrder: {
+                    get: function () {
+                        return this._originalCommands;
+                    }
+                },
                 layout: function _AppBarMenuLayout_layout(commands) {
                     this._writeProfilerMark("layout,info");
 

@@ -823,26 +823,26 @@ module CorsicaTests {
             complete();
         };
 
-        testNewCommandsSetOrderPeserveredAfterSwitchingLayouts = function (complete) {
+        testNewCommandsSetOrderPreservedAfterSwitchingLayouts = function (complete) {
             // Verify setting new commands while in commands and menu layout, and then switching back to custom layout will leave the
             // new commands in the custom layout AppBar DOM in the same order they were initially passed to the commands
             // setter.
-            var verifyNewCommandsSetOrderPeserveredAfterSwitchingLayouts = function (originalLayout) {
+            var verifyNewCommandsSetOrderPreservedAfterSwitchingLayouts = function (originalLayout) {
                 var root = document.getElementById("appBarDiv");
                 root.innerHTML =
                 "<div id='appBar'>" +
                 "<button data-win-control='WinJS.UI.AppBarCommand' data-win-options='{id:\"Button0\", label:\"Button 0\", type:\"button\", section:\"primary\"}'></button>" +
                 "<hr data-win-control='WinJS.UI.AppBarCommand' data-win-options='{id:\"Hr0\", type:\"separator\", hidden: true, section:\"primary\"}' />" +
-                "<button data-win-control='WinJS.UI.AppBarCommand' data-win-options='{id:\"Button1\", label:\"Button 1\", type:\"button\", section:\"primary\"}'></button>" +
+                "<button data-win-control='WinJS.UI.AppBarCommand' data-win-options='{id:\"Button1\", label:\"Button 1\", type:\"button\", section:\"secondary\"}'></button>" +
                 "</div>";
                 var appBar = new WinJS.UI.AppBar(<HTMLElement>root.querySelector("#appBar"), {
                     layout: originalLayout
                 });
 
                 var newCommands: any = [
-                    { id: 'Button2', label: 'Button 2', section: 'primary' },
-                    { id: 'HR1', type: 'separator', section: 'primary' },
-                    { id: 'Button3', label: 'Button 3', section: 'secondary' },
+                    { id: 'Button2', label: 'Button 2', section: 'secondary' },
+                    { id: 'HR1', type: 'separator', hidden: true, section: 'primary' },
+                    { id: 'Button3', label: 'Button 3', section: 'primary' },
                 ];
 
                 appBar.commands = newCommands;
@@ -851,13 +851,14 @@ module CorsicaTests {
                 // in the same order the setter received them in.
                 appBar.layout = "custom";
                 var commands: any = appBar.element.querySelectorAll(".win-command");
+                LiveUnit.Assert.areEqual(commands.length, newCommands.length, "AppBar should contain the same number of commands before and after switching layouts.");
                 LiveUnit.Assert.areEqual(newCommands[0].id, commands[0].id);
                 LiveUnit.Assert.areEqual(newCommands[1].id, commands[1].id);
                 LiveUnit.Assert.areEqual(newCommands[2].id, commands[2].id);
             };
 
-            verifyNewCommandsSetOrderPeserveredAfterSwitchingLayouts("commands");
-            verifyNewCommandsSetOrderPeserveredAfterSwitchingLayouts("menu");
+            verifyNewCommandsSetOrderPreservedAfterSwitchingLayouts("commands");
+            verifyNewCommandsSetOrderPreservedAfterSwitchingLayouts("menu");
             complete();
         };
 
@@ -875,12 +876,12 @@ module CorsicaTests {
             // Make sure we start from a sane place and verify initial commands layout HTML.
             LiveUnit.Assert.isTrue(WinJS.Utilities.hasClass(appBar.element, _Constants.commandLayoutClass), "Commands Layout AppBar should have the win-commandlayout CSS class");
             var layoutHTML = appBar.element.querySelectorAll(".win-primarygroup, .win-secondarygroup");
-            LiveUnit.Assert.isTrue(layoutHTML.length === 2, "commands layout appbar should have its own HTML inside of the AppBar element.");
+            LiveUnit.Assert.areEqual(layoutHTML.length, 2, "commands layout appbar should have its own HTML inside of the AppBar element.");
 
             appBar.layout = "custom";
             LiveUnit.Assert.isFalse(WinJS.Utilities.hasClass(appBar.element, _Constants.commandLayoutClass), "Custom Layout AppBar should not have the commands layout CSS class");
             layoutHTML = appBar.element.querySelectorAll(".win-primarygroup, .win-secondarygroup");
-            LiveUnit.Assert.isTrue(layoutHTML.length === 0, "custom layout appbar should not have commands layout HTML inside of the AppBar element.");
+            LiveUnit.Assert.areEqual(layoutHTML.length, 0, "custom layout appbar should not have commands layout HTML inside of the AppBar element.");
 
             complete();
         };
@@ -899,12 +900,12 @@ module CorsicaTests {
             // Make sure we start from a sane place and verify initial menu layout HTML.
             LiveUnit.Assert.isTrue(WinJS.Utilities.hasClass(appBar.element, _Constants.menuLayoutClass), "Commands Layout AppBar should have the win-menulayout CSS class");
             var layoutHTML = appBar.element.querySelectorAll(".win-appbar-menu");
-            LiveUnit.Assert.isTrue(layoutHTML.length === 1, "menu layout appbar should have its own HTML inside of the AppBar element.");
+            LiveUnit.Assert.areEqual(layoutHTML.length, 1, "menu layout appbar should have its own HTML inside of the AppBar element.");
 
             appBar.layout = "custom";
             LiveUnit.Assert.isFalse(WinJS.Utilities.hasClass(appBar.element, _Constants.menuLayoutClass), "Custom Layout AppBar should not have the menu layout CSS class");
             layoutHTML = appBar.element.querySelectorAll(".win-appbar-menu");
-            LiveUnit.Assert.isTrue(layoutHTML.length === 0, "custom layout appbar should not have menu layout HTML inside of the AppBar element.");
+            LiveUnit.Assert.areEqual(layoutHTML.length, 0, "custom layout appbar should not have menu layout HTML inside of the AppBar element.");
 
             complete();
         };
