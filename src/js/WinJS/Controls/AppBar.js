@@ -368,7 +368,7 @@ define([
                 // validate that if they didn't set commands, but want command
                 // layout that the HTML only contains commands.  Do this first
                 // so that we don't leave partial AppBars in the DOM.
-                if (options.layout !== _Constants.appBarLayoutCustom && !options.commands && this._element) {
+                if (options.layout !== _Constants.appBarLayouts.custom && !options.commands && this._element) {
                     // Shallow copy object so we can modify it.
                     options = _BaseUtils._shallowCopy(options);
                     options.commands = this._verifyCommandsOnly(this._element, "WinJS.UI.AppBarCommand");
@@ -385,7 +385,7 @@ define([
 
                 // Run layout setter immediately. We need to know our layout in order to correctly
                 // position any commands that may be getting set through the constructor.
-                this.layout = options.layout || _Constants.appBarLayoutMenu;
+                this.layout = options.layout || _Constants.appBarLayouts.menu;
                 delete options.layout;
 
                 // Need to set placement before closedDisplayMode, closedDisplayMode sets our starting position, which is dependant on placement.
@@ -436,7 +436,7 @@ define([
                 _ElementUtilities._addEventListener(this._element, "focusout", function () { _Overlay._Overlay._hideIfAllAppBarsLostFocus(); }, false);
 
 
-                if (this.closedDisplayMode === closedDisplayModes.none && this.layout === _Constants.appBarLayoutCommands) {
+                if (this.closedDisplayMode === closedDisplayModes.none && this.layout === _Constants.appBarLayouts.commands) {
                     // Remove the commands layout AppBar from the layout tree at this point so we don't cause unnecessary layout costs whenever
                     // the window resizes or when CSS changes are applied to the commands layout AppBar's parent element.
                     this._element.style.display = "none";
@@ -496,9 +496,9 @@ define([
                         return this._layout.type;
                     },
                     set: function (layout) {
-                        if (layout !== _Constants.appBarLayoutCommands &&
-                            layout !== _Constants.appBarLayoutCustom &&
-                            layout !== _Constants.appBarLayoutMenu) {
+                        if (layout !== _Constants.appBarLayouts.commands &&
+                            layout !== _Constants.appBarLayouts.custom &&
+                            layout !== _Constants.appBarLayouts.menu) {
                             throw new _ErrorFromName("WinJS.UI.AppBar.BadLayout", strings.badLayout);
                         }
 
@@ -523,9 +523,9 @@ define([
                         }
 
                         // Set layout
-                        if (layout === _Constants.appBarLayoutCommands) {
+                        if (layout === _Constants.appBarLayouts.commands) {
                             this._layout = new _Layouts._AppBarCommandsLayout();
-                        } else if (layout === _Constants.appBarLayoutMenu) {
+                        } else if (layout === _Constants.appBarLayouts.menu) {
                             this._layout = new _Layouts._AppBarMenuLayout();
                         } else {
                             // Custom layout uses Base AppBar Layout class.

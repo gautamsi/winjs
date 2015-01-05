@@ -1263,7 +1263,7 @@ module CorsicaTests {
                 failures = checkShouldBeDisplayNone(appBar, false);
                 LiveUnit.Assert.isFalse(failures.length, msg);
 
-                if (appBar.winControl.layout !== _Constants.appBarLayoutMenu) {
+                if (appBar.winControl.layout !== _Constants.appBarLayouts.menu) {
                     msg = "Content hosted by Open AppBar should have dimensions. Menu layout can have hidden elements (e.g. leading/trailing separators)";
                     LiveUnit.LoggingCore.logComment("Test: " + msg);
                     var contents = appBar.querySelectorAll("*:not(.win-appbar-invokebutton):not(.win-finaldiv):not(.win-firstdiv)");
@@ -1298,7 +1298,7 @@ module CorsicaTests {
                     failures;
 
                 var invokeButton = appBar.querySelector(".win-appbar-invokebutton");
-                if (appBar.winControl.layout === _Constants.appBarLayoutMenu &&
+                if (appBar.winControl.layout === _Constants.appBarLayouts.menu &&
                     getComputedStyle(invokeButton).visibility === "hidden") {
                     invokeButton = appBar.querySelector("." + _ToolBarConstants.overflowButtonCssClass);
                 }
@@ -1314,11 +1314,11 @@ module CorsicaTests {
                 failures = checkShouldBeDisplayNone(invokeButtonSubTree, false);
                 LiveUnit.Assert.isFalse(failures.length, msg);
 
-                if (appBar.winControl.layout === _Constants.appBarLayoutCommands) {
+                if (appBar.winControl.layout === _Constants.appBarLayouts.commands) {
                     msg = "AppBar with commands layout & closedDisplayMode !== 'none' should reserve right padding that matches the width of the invokeButton";
                     LiveUnit.LoggingCore.logComment("Test: " + msg);
                     LiveUnit.Assert.areEqual(invokeButtonWidth, parseInt(getComputedStyle(appBar).paddingRight), msg);
-                } else if (appBar.winControl.layout === _Constants.appBarLayoutCustom || appBar.winControl.layout === _Constants.appBarLayoutMenu) {
+                } else if (appBar.winControl.layout === _Constants.appBarLayouts.custom || appBar.winControl.layout === _Constants.appBarLayouts.menu) {
                     msg = "AppBar with " + appBar.winControl.layout + " layout & closedDisplayMode !== 'none' should NOT reserve right padding for the invokeButton";
                     LiveUnit.LoggingCore.logComment("Test: " + msg);
                     LiveUnit.Assert.areNotEqual(invokeButtonWidth, parseInt(getComputedStyle(appBar).paddingRight), msg);

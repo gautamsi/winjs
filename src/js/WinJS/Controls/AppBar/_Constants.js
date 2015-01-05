@@ -33,9 +33,11 @@ define([
         appBarPlacementBottom: "bottom",
 
         // Constants for AppBar layouts
-        appBarLayoutCustom: "custom",
-        appBarLayoutCommands: "commands",
-        appBarLayoutMenu: "menu",
+        appBarLayouts: {
+            custom: "custom",
+            commands: "commands",
+            menu: "menu",
+        },
 
         // Constant for AppBar invokebutton width
         appBarInvokeButtonWidth: 32,

@@ -194,7 +194,7 @@ define([
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
         _AppBarCustomLayout: _Base.Namespace._lazy(function () {
             var layoutClassName = _Constants.customLayoutClass;
-            var layoutType = _Constants.appBarLayoutCustom;
+            var layoutType = _Constants.appBarLayouts.custom;
 
             var _AppBarCustomLayout = _Base.Class.derive(exports._AppBarBaseLayout, function _AppBarCustomLayout(appBarEl) {
                 exports._AppBarBaseLayout.call(this, appBarEl, { _className: layoutClassName, _type: layoutType });
@@ -227,7 +227,7 @@ define([
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
         _AppBarCommandsLayout: _Base.Namespace._lazy(function () {
             var layoutClassName = _Constants.commandLayoutClass;
-            var layoutType = _Constants.appBarLayoutCommands;
+            var layoutType = _Constants.appBarLayouts.commands;
 
             var _AppBarCommandsLayout = _Base.Class.derive(exports._AppBarBaseLayout, function _AppBarCommandsLayout_ctor(appBarEl) {
                 exports._AppBarBaseLayout.call(this, appBarEl, { _className: layoutClassName, _type: layoutType });
@@ -513,7 +513,7 @@ define([
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
         _AppBarMenuLayout: _Base.Namespace._lazy(function () {
             var layoutClassName = _Constants.menuLayoutClass;
-            var layoutType = _Constants.appBarLayoutMenu;
+            var layoutType = _Constants.appBarLayouts.menu;
 
             var _AppBarMenuLayout = _Base.Class.derive(exports._AppBarBaseLayout, function _AppBarMenuLayout_ctor(appBarEl) {
                 exports._AppBarBaseLayout.call(this, appBarEl, { _className: layoutClassName, _type: layoutType });
