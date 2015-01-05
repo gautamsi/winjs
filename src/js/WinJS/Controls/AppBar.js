@@ -599,7 +599,9 @@ define([
                         // Dispose old commands before tossing them out.
                         if (!this._initializing) {
                             // AppBarCommands defined in markup don't want to be disposed during initialization.
-                            this._disposeChildren();
+                            this._layout.commandsInOrder.forEach(function (commandElement) {
+                                _Dispose.disposeSubTree(commandElement);
+                            });
                         }
                         this._layoutCommands(commands);
                     }

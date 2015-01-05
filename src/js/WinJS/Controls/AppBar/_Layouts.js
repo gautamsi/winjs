@@ -21,10 +21,13 @@ define([
 ], function appBarLayoutsInit(exports, _TransitionAnimation, BindingList, _BaseUtils, _Global, _Base, _ErrorFromName, _Resources, _WriteProfilerMark, ToolBar, _ToolBarConstants, Promise, Scheduler, _Control, _Dispose, _ElementUtilities, _Command, _Constants) {
     "use strict";
 
-    // AppBar will use this when AppBar.layout property is set to "custom"
+    function abstract() {
+        alert("Layouts need to implement this abstract method");
+    }
+
+    // Abstract Layout class that all layouts inherit from.
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
         _AppBarBaseLayout: _Base.Namespace._lazy(function () {
-            var baseType = _Constants.appBarLayoutCustom;
 
             var strings = {
                 get nullCommand() { return "Invalid argument: command must not be null"; }
@@ -47,41 +50,36 @@ define([
                     },
                 },
                 type: {
-                    get: function _AppBarBaseLayout_get_className() {
-                        return this._type || baseType;
+                    get: function _AppBarBaseLayout_get_type() {
+                        return this._type;
                     },
                 },
-                commandsInOrder: {
-                    get: function _AppBarBaseLayout_get_commandsInOrder() {
-                        // Gets a DOM ordered Array of the AppBarCommand elements in the AppBar.
-                        var commands = this.appBarEl.querySelectorAll("." + _Constants.appBarCommandClass);
-
-                        // Needs to be an array, in case these are getting passed to a new layout.
-                        // The new layout will invoke the AppBar._layoutCommands, and it expects an
-                        // Array.
-                        return Array.prototype.slice.call(commands);
-                    }
-                },
                 connect: function _AppBarBaseLayout_connect(appBarEl) {
-                    if (this.className) {
-                        _ElementUtilities.addClass(appBarEl, this.className);
-                    }
+                    _ElementUtilities.addClass(appBarEl, this.className);
                     this.appBarEl = appBarEl;
                 },
                 disconnect: function _AppBarBaseLayout_disconnect() {
+                    // Remove and dispose of all remants of the layout from the AppBar element and 
+                    // return an array of the AppBarCommands in their original order.
+
                     if (this.className) {
                         _ElementUtilities.removeClass(this.appBarEl, this.className);
                     }
-                    this.appBarEl = null;
+
+                    // Prevent AppBarCommands from being disposed with the rest of the layout.
+                    var commands = this._dischargeCommands();
+
                     this.dispose();
+                    this.appBarEl = null;
+
+                    return commands;
                 },
-                layout: function _AppBarBaseLayout_layout(commands) {
-                    // Append commands to the DOM.
-                    var len = commands.length;
-                    for (var i = 0; i < len; i++) {
-                        var command = this.sanitizeCommand(commands[i]);
-                        this.appBarEl.appendChild(command._element);
-                    }
+                dispose: function _AppBarBaseLayout_dispose() {
+                    this._disposed = true;
+                    this.commandsInOrder.forEach(function (commandElement) {
+                        _Dispose.disposeSubTree(commandElement);
+                    });
+                    this._dispose();
                 },
                 showCommands: function _AppBarBaseLayout_showCommands(commands) {
                     // Use the default overlay showCommands implementation
@@ -112,26 +110,34 @@ define([
 
                     return command;
                 },
-                dispose: function _AppBarBaseLayout_dispose() {
-                    this._disposed = true;
+                setFocusOnShow: function _AppBarBaseLayout_setFocusOnShow() {
+                    this.appBarEl.winControl._setFocusToAppBar();
                 },
-                disposeChildren: function _AppBarBaseLayout_disposeChildren() {
-                    var appBarFirstDiv = this.appBarEl.querySelectorAll("." + _Constants.firstDivClass);
-                    appBarFirstDiv = appBarFirstDiv.length >= 1 ? appBarFirstDiv[0] : null;
-                    var appBarFinalDiv = this.appBarEl.querySelectorAll("." + _Constants.finalDivClass);
-                    appBarFinalDiv = appBarFinalDiv.length >= 1 ? appBarFinalDiv[0] : null;
 
-                    var children = this.appBarEl.children;
-                    var length = children.length;
-                    for (var i = 0; i < length; i++) {
-                        var element = children[i];
-                        if (element === appBarFirstDiv || element === appBarFinalDiv) {
-                            continue;
-                        } else {
-                            _Dispose.disposeSubTree(element);
-                        }
-                    }
-                },
+
+                //// Possible NOPS
+                //disposeChildren: function _AppBarBaseLayout_disposeChildren() {
+                //    //var appBarFirstDiv = this.appBarEl.querySelectorAll("." + _Constants.firstDivClass);
+                //    //appBarFirstDiv = appBarFirstDiv.length >= 1 ? appBarFirstDiv[0] : null;
+                //    //var appBarFinalDiv = this.appBarEl.querySelectorAll("." + _Constants.finalDivClass);
+                //    //appBarFinalDiv = appBarFinalDiv.length >= 1 ? appBarFinalDiv[0] : null;
+
+                //    //var children = this.appBarEl.children;
+                //    //var length = children.length;
+                //    //for (var i = 0; i < length; i++) {
+                //    //    var element = children[i];
+                //    //    if (element === appBarFirstDiv || element === appBarFinalDiv) {
+                //    //        continue;
+                //    //    } else {
+                //    //        _Dispose.disposeSubTree(element);
+                //    //    }
+                //    //}
+
+                //    _Dispose.disposeSubTree(this.appBarEl);
+
+                //},
+
+                // Definite NOPS
                 handleKeyDown: function _AppBarBaseLayout_handleKeyDown() {
                     // NOP
                 },
@@ -159,11 +165,61 @@ define([
                     // NOP
                     return Promise.wrap();
                 },
-                setFocusOnShow: function _AppBarBaseLayout_setFocusOnShow() {
-                    this.appBarEl.winControl._setFocusToAppBar();
-                }
+
+                // Abstract members
+                commandsInOrder: {
+                    get: function _AppBarBaseLayout_get_commandsInOrder() {
+                        // Returns an array of all AppBarCommand elements in the order they were laid out.
+                        abstract();
+                    }
+                },
+                layout: function _AppBarBaseLayout_layout(commands) {
+                    // Append commands to the DOM.
+                    abstract();
+                },
+                _dischargeCommands: function _AppBArBaseLayout_dschargeCommands() {
+                    // 
+                    abstract();
+                },
+                _dispose: function _AppBarBaseLayout__dispose() {
+                    abstract();
+                },
+
             });
             return _AppBarBaseLayout;
+        }),
+    });
+
+    // AppBar will use this when AppBar.layout property is set to "custom"
+    _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
+        _AppBarCustomLayout: _Base.Namespace._lazy(function () {
+            var layoutClassName = _Constants.customLayoutClass;
+            var layoutType = _Constants.appBarLayoutCustom;
+
+            var _AppBarCustomLayout = _Base.Class.derive(exports._AppBarBaseLayout, function _AppBarCustomLayout(appBarEl) {
+                exports._AppBarBaseLayout.call(this, appBarEl, { _className: layoutClassName, _type: layoutType });
+            }, {
+                commandsInOrder: {
+                    get: function _AppBarCustomLayout() {
+                        // Custom layout uses appendChild so the original order of the commands is their order in the DOM.
+                        var commands = this.appBarEl.querySelectorAll("." + _Constants.appBarCommandClass);
+                        return Array.prototype.slice.call(commands);
+                    }
+                },
+                layout: function _AppBarCustomLayout(commands) {
+                    // Append commands to the DOM.
+                    var len = commands.length;
+                    for (var i = 0; i < len; i++) {
+                        var command = this.sanitizeCommand(commands[i]);
+                        this.appBarEl.appendChild(command._element);
+                    }
+
+                },
+                _dispose: function _AppBarCustomLayout__dispose() {
+                    // NOP
+                },
+            });
+            return _AppBarCustomLayout;
         }),
     });
 
@@ -175,7 +231,11 @@ define([
 
             var _AppBarCommandsLayout = _Base.Class.derive(exports._AppBarBaseLayout, function _AppBarCommandsLayout_ctor(appBarEl) {
                 exports._AppBarBaseLayout.call(this, appBarEl, { _className: layoutClassName, _type: layoutType });
-                this._commandLayoutsInit(appBarEl);
+                // Create layout infrastructure
+                this._primaryCommands = _Global.document.createElement("DIV");
+                this._secondaryCommands = _Global.document.createElement("DIV");
+                _ElementUtilities.addClass(this._primaryCommands, _Constants.primaryCommandsClass);
+                _ElementUtilities.addClass(this._secondaryCommands, _Constants.secondaryCommandsClass);
             }, {
                 commandsInOrder: {
                     get: function () {
@@ -228,9 +288,10 @@ define([
                     }.bind(this), Scheduler.Priority.idle, this, "WinJS._commandLayoutsMixin._scaleNewCommands");
 
                 },
-                disposeChildren: function _AppBarCommandsLayout_disposeChildren() {
+                _dispose: function _AppBarCommandsLayout__dispose() {
                     _Dispose.disposeSubTree(this._primaryCommands);
                     _Dispose.disposeSubTree(this._secondaryCommands);
+                    this._originalCommands = [];
                 },
                 handleKeyDown: function _AppBarCommandsLayout_handleKeyDown(event) {
                     var Key = _ElementUtilities.Key;
@@ -327,9 +388,6 @@ define([
                         }
                     }
                 },
-                disconnect: function _AppBarCommandsLayout_disconnect() {
-                    exports._AppBarBaseLayout.prototype.disconnect.call(this);
-                },
                 _getWidthOfFullSizeCommands: function _AppBarCommandsLayout_getWidthOfFullSizeCommands(commands) {
                     // Commands layout puts primary commands and secondary commands into the primary row.
                     // Return the total width of all visible primary and secondary commands as if they were full-size.
@@ -398,13 +456,6 @@ define([
                     focusableCommands.focusedIndex = focusedIndex;
                     return focusableCommands;
                 },
-                _commandLayoutsInit: function _AppBarCommandsLayout_commandLayoutsInit() {
-                    // Create layout infrastructure
-                    this._primaryCommands = _Global.document.createElement("DIV");
-                    this._secondaryCommands = _Global.document.createElement("DIV");
-                    _ElementUtilities.addClass(this._primaryCommands, _Constants.primaryCommandsClass);
-                    _ElementUtilities.addClass(this._secondaryCommands, _Constants.secondaryCommandsClass);
-                },
                 _scaleHelper: function _AppBarCommandsLayout_scaleHelper() {
                     // This exists as a single line function so that unit tests can
                     // overwrite it since they can't resize the WWA window.
@@ -458,6 +509,7 @@ define([
         }),
     });
 
+    // AppBar will use this when AppBar.layout property is set to "menu"
     _Base.Namespace._moduleDefine(exports, "WinJS.UI", {
         _AppBarMenuLayout: _Base.Namespace._lazy(function () {
             var layoutClassName = _Constants.menuLayoutClass;
@@ -494,14 +546,15 @@ define([
                     }
                     this.appBarEl.appendChild(this._menu);
 
-                    this._toolbarContainer = _Global.document.createElement("div");
+                    this._toolbarContainer = this._toolbarContainer || _Global.document.createElement("div");
                     _ElementUtilities.addClass(this._toolbarContainer, _Constants.toolbarContainerClass);
+
                     this._menu.appendChild(this._toolbarContainer);
 
-                    this._toolbarEl = _Global.document.createElement("div");
+                    this._toolbarEl = this._toolbarEl || _Global.document.createElement("div");
                     this._toolbarContainer.appendChild(this._toolbarEl);
 
-                    this._createToolBar(commands);
+                    this._processToolBar(commands);
                 },
 
                 showCommands: function _AppBarMenuLayout_showCommands(commands) {
@@ -578,12 +631,12 @@ define([
                     return this._animationPromise;
                 },
 
-                disposeChildren: function _AppBarMenuLayout_disposeChildren() {
-                    this._writeProfilerMark("disposeChildren,info");
+                _dispose: function _AppBarMenuLayout__dispose() {
 
                     if (this._toolbar) {
                         _Dispose.disposeSubTree(this._toolbarEl);
                     }
+
                     this._originalCommands = [];
                     this._displayedCommands = [];
                 },
@@ -663,20 +716,20 @@ define([
                     }
                 },
 
-                _createToolBar: function _AppBarMenuLayout_createToolBar(commands) {
-                    this._writeProfilerMark("_createToolBar,info");
+                _processToolBar: function _AppBarMenuLayout_processToolBar(commands) {
+                    this._writeProfilerMark("_processToolBar,info");
 
                     var hadHiddenClass = _ElementUtilities.hasClass(this.appBarEl, _Constants.hiddenClass);
                     _ElementUtilities.removeClass(this.appBarEl, _Constants.hiddenClass);
 
-                    // Make sure AppBar and children have width dimensions.
+                    // Make sure AppBar and children have width dimensions, 
                     var prevAppBarDisplay = this.appBarEl.style.display;
                     this.appBarEl.style.display = "";
 
-                    this._toolbar = new ToolBar.ToolBar(this._toolbarEl, {
-                        data: new BindingList.List(this._originalCommands),
+                    this._toolbar = this._toolbar || new ToolBar.ToolBar(this._toolbarEl, {
                         shownDisplayMode: 'full',
                     });
+                    this._toolbar.data = new BindingList.List(this._originalCommands);
 
                     var that = this;
                     this._appbarInvokeButton = this.appBarEl.querySelector("." + _Constants.invokeButtonClass);
