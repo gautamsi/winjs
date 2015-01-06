@@ -778,7 +778,7 @@ export class ToolBar {
             type: (command.type === _Constants.typeContent ? _Constants.typeFlyout : command.type) || _Constants.typeButton,
             disabled: command.disabled,
             flyout: command.flyout,
-            _beforeInvoke: () => {
+            beforeInvoke: () => {
                 // Save the command that was selected
                 this._chosenCommand = <_Command.ICommand>(menuCommand["_originalToolBarCommand"]);
 
