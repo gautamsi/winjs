@@ -811,7 +811,7 @@ export class ToolBar {
 
     private _setupOverflowArea(additionalCommands: any[]) {
 
-        // Set up special flyout for "content" typed commands in ther overflow area
+        // Set up special flyout for "content" typed commands in the overflow area.
         var isCustomContent = (command: _Command.ICommand) => { return command.type === _Constants.typeContent };
         var customContent = additionalCommands.filter(isCustomContent);
         if (customContent.length === 0) {
