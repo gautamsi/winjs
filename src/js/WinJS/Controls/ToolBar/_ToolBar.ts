@@ -823,21 +823,14 @@ export class ToolBar {
             _ElementUtilities.addClass(this._customContentContainer, _Constants.overflowContentFlyoutCssClass);
             mainFlyout.appendChild(this._customContentContainer);
             this._customContentFlyout = new _Flyout.Flyout(mainFlyout);
+            _Global.document.body.appendChild(this._customContentFlyout.element);
             this._customContentFlyout.onbeforeshow = () => {
-                _Global.document.body.appendChild(this._customContentFlyout.element);
                 _ElementUtilities.empty(this._customContentContainer);
                 _ElementUtilities._reparentChildren(this._chosenCommand.element, this._customContentContainer);
             };
             this._customContentFlyout.onafterhide = () => {
                 _ElementUtilities._reparentChildren(this._customContentContainer, this._chosenCommand.element);
             };
-        }
-
-        if (!this._menu) {
-            this._menu = new Menu.Menu();
-            _ElementUtilities.addClass(this._menu.element, _Constants.overflowAreaCssClass);
-            this.extraClass && _ElementUtilities.addClass(this._menu.element, this.extraClass);
-            _Global.document.body.appendChild(this._menu.element);
         }
 
         if (this.shownDisplayMode === _Constants.shownDisplayModes.full) {
@@ -928,12 +921,12 @@ export class ToolBar {
         //    };
         //}
 
-        //if (!this._menu) {
-        //    this._menu = new Menu.Menu();
-        //    _ElementUtilities.addClass(this._menu.element, _Constants.overflowAreaCssClass);
-        //    this.extraClass && _ElementUtilities.addClass(this._menu.element, this.extraClass);
-        //    _Global.document.body.appendChild(this._menu.element);
-        //}
+        if (!this._menu) {
+            this._menu = new Menu.Menu();
+            _ElementUtilities.addClass(this._menu.element, _Constants.overflowAreaCssClass);
+            this.extraClass && _ElementUtilities.addClass(this._menu.element, this.extraClass);
+            _Global.document.body.appendChild(this._menu.element);
+        }
 
         var menuCommands: _MenuCommand.MenuCommand[] = [];
 
