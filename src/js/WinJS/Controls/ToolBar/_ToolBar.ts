@@ -811,6 +811,7 @@ export class ToolBar {
 
     private _setupOverflowArea(additionalCommands: any[]) {
 
+        // Set up special flyout for "content" typed commands in ther overflow area
         var isCustomContent = (command: _Command.ICommand) => { return command.type === _Constants.typeContent };
         var customContent = additionalCommands.filter(isCustomContent);
         if (customContent.length === 0) {
@@ -898,28 +899,6 @@ export class ToolBar {
 
     private _setupOverflowAreaDetached(additionalCommands: any[]) {
         this._writeProfilerMark("_setupOverflowAreaDetached,info");
-
-        //var isCustomContent = (command: _Command.ICommand) => { return command.type === _Constants.typeContent };
-        //var customContent = additionalCommands.filter(isCustomContent);
-        //if (customContent.length === 0) {
-        //    customContent = this._secondaryCommands.filter(isCustomContent);
-        //}
-
-        //if (customContent.length > 0 && !this._customContentFlyout) {
-        //    var mainFlyout = _Global.document.createElement("div");
-        //    this._customContentContainer = _Global.document.createElement("div");
-        //    _ElementUtilities.addClass(this._customContentContainer, _Constants.overflowContentFlyoutCssClass);
-        //    mainFlyout.appendChild(this._customContentContainer);
-        //    this._customContentFlyout = new _Flyout.Flyout(mainFlyout);
-        //    _Global.document.body.appendChild(this._customContentFlyout.element);
-        //    this._customContentFlyout.onbeforeshow = () => {
-        //        _ElementUtilities.empty(this._customContentContainer);
-        //        _ElementUtilities._reparentChildren(this._chosenCommand.element, this._customContentContainer);
-        //    };
-        //    this._customContentFlyout.onafterhide = () => {
-        //        _ElementUtilities._reparentChildren(this._customContentContainer, this._chosenCommand.element);
-        //    };
-        //}
 
         if (!this._menu) {
             this._menu = new Menu.Menu();
