@@ -708,13 +708,14 @@ define([
                     }
                     var heightVisible = this._isMinimal() ? 0 : this.appBarEl.offsetHeight;
                     if (!this._isBottom()) {
-
+                        // Top AppBar Animation
                         return Animations._resizeTransition(this._menu, this._toolbarEl, {
                             from: { content: heightVisible, total: heightVisible },
                             to: { content: this._menu.offsetHeight, total: this._menu.offsetHeight },
                             dimension: "height",
                         });
                     } else {
+                        // Bottom AppBar Animation
                         var offsetTop = this._menu.offsetHeight - heightVisible;
                         return _TransitionAnimation.executeTransition(this._menu, {
                             property: _BaseUtils._browserStyleEquivalents["transform"].cssName,
@@ -732,13 +733,14 @@ define([
 
                     var heightVisible = this._isMinimal() ? 0 : this.appBarEl.offsetHeight;
                     if (!this._isBottom()) {
-
+                        // Top AppBar Animation
                         return Animations._resizeTransition(this._menu, this._toolbarEl, {
                             to: { content: heightVisible, total: heightVisible },
                             from: { content: this._menu.offsetHeight, total: this._menu.offsetHeight },
                             dimension: "height",
                         });
                     } else {
+                        // Bottom AppBar Animation
                         return _TransitionAnimation.executeTransition(this._menu, {
                             property: _BaseUtils._browserStyleEquivalents["transform"].cssName,
                             delay: 0,
