@@ -487,25 +487,16 @@ define([
                     });
                     this._displayedCommands = this._originalCommands.slice(0);
 
-                    //if (this._menu) {
-                    //    _ElementUtilities.empty(this._menu);
-                    //} else {
-                    //    this._menu = _Global.document.createElement("div");
-                    //    _ElementUtilities.addClass(this._menu, _Constants.menuContainerClass);
-                    //}
-                    //this.appBarEl.appendChild(this._menu);
-
-                    if (this._toolbarContainer) {
-                        _ElementUtilities.empty(this._toolbarContainer);
+                    if (this._menu) {
+                        _ElementUtilities.empty(this._menu);
                     } else {
-                        this._toolbarContainer = _Global.document.createElement("div");
-                        _ElementUtilities.addClass(this._toolbarContainer, _Constants.toolbarContainerClass);
-                        this.appBarEl.appendChild(this._toolbarContainer);
-                        //this._menu.appendChild(this._toolbarContainer);
+                        this._menu = _Global.document.createElement("div");
+                        _ElementUtilities.addClass(this._menu, _Constants.menuContainerClass);
                     }
+                    this.appBarEl.appendChild(this._menu);
 
                     this._toolbarEl = _Global.document.createElement("div");
-                    this._toolbarContainer.appendChild(this._toolbarEl);
+                    this._menu.appendChild(this._toolbarEl);
 
                     this._createToolBar(commands);
                 },
@@ -595,9 +586,9 @@ define([
                 },
 
                 setFocusOnShow: function _AppBarMenuLayout_setFocusOnShow() {
-                    // Make sure the toolbarContainer (used for clipping during the resize animation)
+                    // Make sure the menu (used for clipping during the resize animation)
                     // doesn't scroll when we give focus to the AppBar.
-                    this.appBarEl.winControl._setFocusToAppBar(true, this._toolbarContainer);
+                    this.appBarEl.winControl._setFocusToAppBar(true, this._menu);
                 },
 
                 _updateData: function _AppBarMenuLayout_updateData(data) {
@@ -703,19 +694,6 @@ define([
                 _positionToolBar: function _AppBarMenuLayout_positionToolBar() {
                     if (!this._disposed) {
                         this._writeProfilerMark("_positionToolBar,info");
-
-                        //var menuOffset = this._toolbarEl.offsetHeight - ((this._isMinimal() && !this._isBottom()) ? 0 : this.appBarEl.offsetHeight);
-                        //var toolbarOffset = this._toolbarEl.offsetHeight - (this._isMinimal() ? 0 : this.appBarEl.offsetHeight);
-
-                        // Ensure that initial position is correct
-                        //this._toolbarContainer.style[this._tranformNames.scriptName] = "";
-                        //this._menu.style[this._tranformNames.scriptName] = "";
-                        //this._toolbarEl.style[this._tranformNames.scriptName] = "";
-
-                        //this._toolbarContainer.style[this._tranformNames.scriptName] = "translateY(0px)";
-                        //this._menu.style[this._tranformNames.scriptName] = "translateY(-" + menuOffset + 'px)';
-                        //this._toolbarEl.style[this._tranformNames.scriptName] = "translateY(" + toolbarOffset + 'px)';
-
                         this._initialized = true;
                     }
                 },
@@ -731,17 +709,14 @@ define([
                     var heightVisible = this._isMinimal() ? 0 : this.appBarEl.offsetHeight;
                     if (!this._isBottom()) {
 
-                        return Animations._resizeTransition(this._toolbarContainer, this._toolbarEl, {
+                        return Animations._resizeTransition(this._menu, this._toolbarEl, {
                             from: { content: heightVisible, total: heightVisible },
-                            to: { content: this._toolbarContainer.offsetHeight, total: this._toolbarContainer.offsetHeight },
+                            to: { content: this._menu.offsetHeight, total: this._menu.offsetHeight },
                             dimension: "height",
                         });
                     } else {
-                        // Get values in terms of pixels to perform animation.
-                        //var beginningVisiblePixelHeight = this._visiblePixels[fromPosition],
-                        //    endingVisiblePixelHeight = this._visiblePixels[toPosition],
-                        var offsetTop = this._toolbarContainer.offsetHeight - heightVisible;
-                        return _TransitionAnimation.executeTransition(this._toolbarContainer, {
+                        var offsetTop = this._menu.offsetHeight - heightVisible;
+                        return _TransitionAnimation.executeTransition(this._menu, {
                             property: _BaseUtils._browserStyleEquivalents["transform"].cssName,
                             delay: 0,
                             duration: 367,
@@ -758,13 +733,13 @@ define([
                     var heightVisible = this._isMinimal() ? 0 : this.appBarEl.offsetHeight;
                     if (!this._isBottom()) {
 
-                        return Animations._resizeTransition(this._toolbarContainer, this._toolbarEl, {
+                        return Animations._resizeTransition(this._menu, this._toolbarEl, {
                             to: { content: heightVisible, total: heightVisible },
-                            from: { content: this._toolbarContainer.offsetHeight, total: this._toolbarContainer.offsetHeight },
+                            from: { content: this._menu.offsetHeight, total: this._menu.offsetHeight },
                             dimension: "height",
                         });
                     } else {
-                        return _TransitionAnimation.executeTransition(this._toolbarContainer, {
+                        return _TransitionAnimation.executeTransition(this._menu, {
                             property: _BaseUtils._browserStyleEquivalents["transform"].cssName,
                             delay: 0,
                             duration: 367,
@@ -772,18 +747,6 @@ define([
                             to: "none"
                         });
                     }
-
-                    //// Closing
-                    //var offsetTop = this._toolbarContainer.offsetHeight - heightVisible;
-                    //var toOffset = { top: offsetTop + "px", left: "0px" };
-                    //return Animations.hideEdgeUI(this._toolbarContainer, toOffset, { mechanism: "transition" });
-
-                    //var heightVisible = this._isMinimal() ? 0 : this.appBarEl.offsetHeight;
-                    //var animation1 = this._executeTranslate(this._toolbarContainer, "translateY(0px)");
-                    //var animation2 = this._executeTranslate(this._toolbarEl, "translateY(" + (this._toolbarContainer.offsetHeight - heightVisible) + "px)");
-                    //var animation = Promise.join([animation1, animation2]);
-                    //animation.then(this._positionToolBarBound, this._positionToolBarBound);
-                    //return animation;
                 },
 
                 _executeTranslate: function _AppBarMenuLayout_executeTranslate(element, value) {
