@@ -713,18 +713,13 @@ define([
                             from: { content: heightVisible, total: heightVisible },
                             to: { content: this._menu.offsetHeight, total: this._menu.offsetHeight },
                             dimension: "height",
+                            duration: 400,
+                            timing: "ease-in",
                         });
                     } else {
                         // Bottom AppBar Animation
                         var offsetTop = this._menu.offsetHeight - heightVisible;
-                        return _TransitionAnimation.executeTransition(this._menu, {
-                            property: _BaseUtils._browserStyleEquivalents["transform"].cssName,
-                            delay: 0,
-                            duration: 367,
-                            timing: "cubic-bezier(0.1, 0.9, 0.2, 1)",
-                            to: "translateY(" + -offsetTop + "px)"
-                        });
-
+                        return this._executeTranslate(this._menu, "translateY(" + -offsetTop + "px)");
                     }
                 },
 
@@ -738,16 +733,11 @@ define([
                             to: { content: heightVisible, total: heightVisible },
                             from: { content: this._menu.offsetHeight, total: this._menu.offsetHeight },
                             dimension: "height",
+                            duration: 400,
+                            timing: "ease-in",
                         });
                     } else {
-                        // Bottom AppBar Animation
-                        return _TransitionAnimation.executeTransition(this._menu, {
-                            property: _BaseUtils._browserStyleEquivalents["transform"].cssName,
-                            delay: 0,
-                            duration: 367,
-                            timing: "cubic-bezier(0.1, 0.9, 0.2, 1)",
-                            to: "none"
-                        });
+                        return this._executeTranslate(this._menu, "none");
                     }
                 },
 
@@ -778,11 +768,4 @@ define([
             return _AppBarMenuLayout;
         }),
     });
-
-    //.win-appbar-toolbarcontainer {
-    //    position: absolute;
-    //    right: 0px;
-    //    top: 0px;
-    //    opacity: 1 !important;
-    //}
 });

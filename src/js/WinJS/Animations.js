@@ -689,6 +689,8 @@ define([
         var diff = args.anchorTrailingEdge ? args.to.total - args.from.total : args.from.total - args.to.total;
         var translate = args.dimension === "width" ? "translateX" : "translateY";
         var size = args.dimension;
+        var duration = args.duration || 367;
+        var timing = args.timing || "cubic-bezier(0.1, 0.9, 0.2, 1)";
     
         // Set up
         elementClipper.style[size] = args.to.total + "px";
@@ -702,8 +704,8 @@ define([
         
         // Animate
         var transition = {
-            duration: 367,
-            timing: "cubic-bezier(0.1, 0.9, 0.2, 1)",
+            duration: duration,
+            timing: timing,
             to: ""
         };
         return Promise.join([
@@ -715,6 +717,8 @@ define([
     function shrinkTransition(elementClipper, element, args) {
         var diff = args.anchorTrailingEdge ? args.from.total - args.to.total : args.to.total - args.from.total;
         var translate = args.dimension === "width" ? "translateX" : "translateY";
+        var duration = args.duration || 367;
+        var timing = args.timing || "cubic-bezier(0.1, 0.9, 0.2, 1)";
     
         // Set up
         elementClipper.style[transformNames.scriptName] = "";
@@ -726,8 +730,8 @@ define([
     
         // Animate
         var transition = {
-            duration: 367,
-            timing: "cubic-bezier(0.1, 0.9, 0.2, 1)"
+            duration: duration,
+            timing: timing
         };
         var clipperTransition = _BaseUtils._merge(transition, { to: translate + "(" + diff + "px)" });
         var elementTransition = _BaseUtils._merge(transition, { to: translate + "(" + -diff + "px)" });
