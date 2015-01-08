@@ -707,7 +707,11 @@ define([
                         this._positionToolBar();
                     }
                     var heightVisible = this._isMinimal() ? 0 : this.appBarEl.offsetHeight;
-                    if (!this._isBottom()) {
+                    if (this._isBottom()) {
+                        // Bottom AppBar Animation
+                        var offsetTop = this._menu.offsetHeight - heightVisible;
+                        return this._executeTranslate(this._menu, "translateY(" + -offsetTop + "px)");
+                    } else {
                         // Top AppBar Animation
                         return Animations._resizeTransition(this._menu, this._toolbarEl, {
                             from: { content: heightVisible, total: heightVisible },
@@ -716,10 +720,6 @@ define([
                             duration: 400,
                             timing: "ease-in",
                         });
-                    } else {
-                        // Bottom AppBar Animation
-                        var offsetTop = this._menu.offsetHeight - heightVisible;
-                        return this._executeTranslate(this._menu, "translateY(" + -offsetTop + "px)");
                     }
                 },
 
@@ -727,17 +727,17 @@ define([
                     this._writeProfilerMark("_animateToolBarExit,info");
 
                     var heightVisible = this._isMinimal() ? 0 : this.appBarEl.offsetHeight;
-                    if (!this._isBottom()) {
+                    if (this._isBottom()) {
+                        return this._executeTranslate(this._menu, "none");
+                    } else {
                         // Top AppBar Animation
                         return Animations._resizeTransition(this._menu, this._toolbarEl, {
-                            to: { content: heightVisible, total: heightVisible },
                             from: { content: this._menu.offsetHeight, total: this._menu.offsetHeight },
+                            to: { content: heightVisible, total: heightVisible },
                             dimension: "height",
                             duration: 400,
                             timing: "ease-in",
                         });
-                    } else {
-                        return this._executeTranslate(this._menu, "none");
                     }
                 },
 

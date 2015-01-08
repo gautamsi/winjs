@@ -2531,6 +2531,8 @@ define([
         //     from/to are objects of the form { content: number; total: number; }. "content" is the
         //     width/height of *element*'s content box (e.g. getContentWidth). "total" is the width/height
         //     of *element*'s margin box (e.g. getTotalWidth).
+        //   - duration: The CSS transition duration property.
+        //   - timing: The CSS transition timing property.
         //   - dimension: The dimension on which *element* is resizing. Either "width" or "height".
         //   - anchorTrailingEdge: During the resize animation, one edge will move and the other edge will
         //     remain where it is. This flag specifies which edge is anchored (i.e. won't move).
