@@ -561,15 +561,13 @@ define([
                     }
 
                     this._animating = true;
-                    if (toPosition === "shown" || (fromPosition !== "shown" && toPosition === "compact")) {
+                    if (toPosition === "shown") {
                         this._positionToolBar();
                         this._animationPromise = this._animateToolBarEntrance();
+                    } else if (fromPosition === "shown") {
+                        this._animationPromise = this._animateToolBarExit();
                     } else {
-                        if (fromPosition === "minimal" || fromPosition === "compact" || fromPosition === "hidden") {
-                            this._animationPromise = Promise.wrap();
-                        } else {
-                            this._animationPromise = this._animateToolBarExit();
-                        }
+                        this._animationPromise = Promise.wrap();
                     }
                     this._animationPromise.then(this._animationCompleteBound, this._animationCompleteBound);
                     return this._animationPromise;
