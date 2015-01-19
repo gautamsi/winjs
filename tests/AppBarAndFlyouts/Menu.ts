@@ -57,22 +57,21 @@ module CorsicaTests {
             OverlayHelpers.disposeAndRemove(menuElement);
         }
 
-
-    // Test Menu Instantiation with null element
-    testMenuNullInstantiation = function () {
+        // Test Menu Instantiation with null element
+        testMenuNullInstantiation = function () {
             LiveUnit.LoggingCore.logComment("Attempt to Instantiate the Menu with null element");
             var menu = new Menu(null, { commands: { type: 'separator', id: 'sep' } });
             LiveUnit.Assert.isNotNull(menu, "Menu instantiation was null when sent a null Menu element.");
         }
 
-    // Test Menu Instantiation with no options
-    testMenuEmptyInstantiation = function () {
+        // Test Menu Instantiation with no options
+        testMenuEmptyInstantiation = function () {
             LiveUnit.LoggingCore.logComment("Attempt to Instantiate the Menu with empty constructor");
             var menu = new Menu();
             LiveUnit.Assert.isNotNull(menu, "Menu instantiation was null when sent a Empty Menu element.");
         }
 
-    // Test multiple instantiation of the same Menu DOM element
+        // Test multiple instantiation of the same Menu DOM element
         testMenuMultipleInstantiation() {
             MenuTests.prototype.testMenuMultipleInstantiation["LiveUnit.ExpectedException"] = { message: "Invalid argument: Controls may only be instantiated one time for each DOM element" };
             // Get the Menu element from the DOM
@@ -90,7 +89,6 @@ module CorsicaTests {
                 OverlayHelpers.disposeAndRemove(menuElement);
             }
         }
-
 
         // Test Menu parameters
         testMenuParams = function () {
@@ -154,7 +152,7 @@ module CorsicaTests {
             testBadInitOption("placement", {}, "WinJS.UI.Flyout.BadPlacement", badPlacement);
         }
 
-    testDefaultMenuParameters = function () {
+        testDefaultMenuParameters = function () {
             // Get the Menu element from the DOM
             var menuElement = document.createElement("div");
             document.body.appendChild(menuElement);
@@ -168,9 +166,8 @@ module CorsicaTests {
             OverlayHelpers.disposeAndRemove(menuElement);
         }
 
-
-    // Simple Function Tests
-    testSimpleMenuTestsFunctions = function () {
+        // Simple Function Tests
+        testSimpleMenuTestsFunctions = function () {
             // Get the MenuTests element from the DOM
             var menuElement = document.createElement("div");
             document.body.appendChild(menuElement);
@@ -188,8 +185,7 @@ module CorsicaTests {
             OverlayHelpers.disposeAndRemove(menuElement);
         }
 
-
-    testMenuDispose = function () {
+        testMenuDispose = function () {
             var mc1 = new MenuCommand(document.createElement("button"), { label: "mc1" });
             var mc2 = new MenuCommand(document.createElement("button"), { label: "mc2" });
 
@@ -204,7 +200,7 @@ module CorsicaTests {
             menu.dispose();
         }
 
-    testMenuShowThrows = function (complete) {
+        testMenuShowThrows = function (complete) {
             // Get the menu element from the DOM
             var menuElement = document.createElement("div");
             document.body.appendChild(menuElement);
@@ -230,7 +226,7 @@ module CorsicaTests {
             complete();
         }
 
-    testBackClickEventTriggersLightDismiss = function (complete) {
+        testBackClickEventTriggersLightDismiss = function (complete) {
             // Verifies that a shown Menu will handle the WinJS.Application.backclick event and light dismiss itself.
 
             // Simulate
@@ -340,14 +336,14 @@ module CorsicaTests {
                 LiveUnit.LoggingCore.logComment("Test: " + msg);
                 return OverlayHelpers.hide(menu);
             }).then(() => {
-                LiveUnit.Assert.isTrue(test2Ran, "TEST ERROR: Test 2 did not run.");
+                    LiveUnit.Assert.isTrue(test2Ran, "TEST ERROR: Test 2 did not run.");
 
-                OverlayHelpers.disposeAndRemove(menuElement);
-                complete();
-            });
+                    OverlayHelpers.disposeAndRemove(menuElement);
+                    complete();
+                });
         }
 
-        testMenuLaysoutCommandsCorrectly = function (complete) {
+        testMenuLaysOutCommandsCorrectly = function (complete) {
             // Verifies that layout is adjusted for all visible commands in a menu depending on what other types of commands are also visible in the menu.
             // Command layouts should be updated during the following function calls:
             //  menu.show()
@@ -450,6 +446,59 @@ module CorsicaTests {
             menu.show(menu.element);
         };
 
+        testMenuHidesOnActionCommitted = function (complete) {
+            // Whenever any 'button' or 'toggle' typed MenuCommand is invoked, 
+            // an action is considered to have been committed and the containing Menu should hide.
+
+            var commandTypes = {
+                button: "button",
+                toggle: "toggle",
+                separator: "separator",
+                flyout: "flyout"
+            };
+
+            var asyncTest = (type: string) => {
+                return new WinJS.Promise((c) => {
+
+                    var menuElement = document.createElement('div');
+                    document.body.appendChild(menuElement);
+                    var menu = new Menu(menuElement, { anchor: document.body });
+                    var command = new MenuCommand(null, { type: type });
+                    menu.commands = [command];
+
+                    function cleanUp() {
+                        menu.onbeforehide = () => { };
+                        OverlayHelpers.disposeAndRemove(menuElement);
+                        c();
+                    }
+
+                    OverlayHelpers.show(menu).then(() => {
+                        switch (command.type) {
+                            case commandTypes.button:
+                            case commandTypes.toggle:
+                                menu.onbeforehide = () => {
+                                    cleanUp();
+                                }
+                                    command._invoke();
+                                break;
+
+                            case commandTypes.separator:
+                            case commandTypes.flyout:
+                                menu.onbeforehide = () => {
+                                    LiveUnit.Assert.fail("Menu should not hide when command of type '" + command.type + "' is invoked");
+                                }
+                                    command._invoke();
+                                WinJS.Promise.timeout(0).then(cleanUp);
+                                break;
+                        }
+                    });
+                });
+            };
+
+            // Run a test for each commandType.
+            Helper.Promise.forEach(Object.keys(commandTypes), asyncTest).done(complete);
+        };
+
         testFocusChangeBetweenCommandDeactivatesFlyoutCommands = function (complete) {
             // Moving focus between commands in a Menu will deactivate any Flyout typed commands in the menu each time.
             // Menus will apply focus to MenuCommands on "mouseover" so this should verify the scenario where an
@@ -460,7 +509,7 @@ module CorsicaTests {
             var menuElement = document.createElement('div');
             menuElement.id = "menu";
             document.body.appendChild(menuElement);
-            var menu = new Menu(menuElement, { anchor: menuElement });
+            var menu = new Menu(menuElement, { anchor: document.body });
 
             var subMenuElement = document.createElement('div');
             subMenuElement.id = "subMenuElement";
@@ -485,32 +534,32 @@ module CorsicaTests {
 
                 return MenuCommand._activateFlyoutCommand(f1);
             }).then(() => {
-                OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(f1, "TEST ERROR: command needs to be activated before continuing");
+                    OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(f1, "TEST ERROR: command needs to be activated before continuing");
 
-                msg = "Focusing an activated 'flyout' typed command in a menu should leave it activated";
-                LiveUnit.LoggingCore.logComment("Test: " + msg);
-                f1.element.focus();
-                OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(f1, msg);
+                    msg = "Focusing an activated 'flyout' typed command in a menu should leave it activated";
+                    LiveUnit.LoggingCore.logComment("Test: " + msg);
+                    f1.element.focus();
+                    OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(f1, msg);
 
-                msg = "Changing focus from an activated 'flyout' typed command in a Menu, to any other command in that Menu, should deactivate all commands.";
-                LiveUnit.LoggingCore.logComment("Test : " + msg);
-                f2.element.focus();
-                verifyAllCommandsDeactivated(commands, msg);
+                    msg = "Changing focus from an activated 'flyout' typed command in a Menu, to any other command in that Menu, should deactivate all commands.";
+                    LiveUnit.LoggingCore.logComment("Test : " + msg);
+                    f2.element.focus();
+                    verifyAllCommandsDeactivated(commands, msg);
 
-                return MenuCommand._activateFlyoutCommand(f2);
-            }).then(() => {
-                OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(f2, "TEST ERROR: command needs to be activated before continuing");
+                    return MenuCommand._activateFlyoutCommand(f2);
+                }).then(() => {
+                    OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(f2, "TEST ERROR: command needs to be activated before continuing");
 
-                msg = "Changing focus from an activated 'flyout' typed command in a Menu, to any other command in that Menu, should deactivate all commands.";
-                LiveUnit.LoggingCore.logComment("Test: " + msg);
-                b1.element.focus();
-                verifyAllCommandsDeactivated(commands, msg);
+                    msg = "Changing focus from an activated 'flyout' typed command in a Menu, to any other command in that Menu, should deactivate all commands.";
+                    LiveUnit.LoggingCore.logComment("Test: " + msg);
+                    b1.element.focus();
+                    verifyAllCommandsDeactivated(commands, msg);
 
-                OverlayHelpers.disposeAndRemove(menuElement);
-                OverlayHelpers.disposeAndRemove(subMenuElement);
-                OverlayHelpers.disposeAndRemove(subFlyoutElement);
-                complete();
-            });
+                    OverlayHelpers.disposeAndRemove(menuElement);
+                    OverlayHelpers.disposeAndRemove(subMenuElement);
+                    OverlayHelpers.disposeAndRemove(subFlyoutElement);
+                    complete();
+                });
         };
 
         testCommandsDeactivateWhenContainingMenuHides = function (complete) {
@@ -520,7 +569,7 @@ module CorsicaTests {
             var menu1Element = document.createElement('div');
             menu1Element.id = "menu1";
             document.body.appendChild(menu1Element);
-            var menu1 = new Menu(menu1Element, { anchor: menu1Element });
+            var menu1 = new Menu(menu1Element, { anchor: document.body });
 
             var menu2Element = document.createElement('div');
             menu2Element.id = "menu2";
@@ -543,25 +592,25 @@ module CorsicaTests {
             OverlayHelpers.show(menu1).then(() => {
                 return MenuCommand._activateFlyoutCommand(c1);
             }).then(() => {
-                OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(c1, "TEST ERROR: command needs to be activated before continuing");
-                return MenuCommand._activateFlyoutCommand(c2);
-            }).then(() => {
-                OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(c2, "TEST ERROR: command needs to be activated before continuing");
+                    OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(c1, "TEST ERROR: command needs to be activated before continuing");
+                    return MenuCommand._activateFlyoutCommand(c2);
+                }).then(() => {
+                    OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(c2, "TEST ERROR: command needs to be activated before continuing");
 
-                msg = "When a Menu is hidden, all of its 'flyout' typed MenuCommands should be deactivated";
-                LiveUnit.LoggingCore.logComment("Test: " + msg);
+                    msg = "When a Menu is hidden, all of its 'flyout' typed MenuCommands should be deactivated";
+                    LiveUnit.LoggingCore.logComment("Test: " + msg);
                 return OverlayHelpers.hide(menu2)
             }).then(() => {
-                OverlayHelpers.Assert.verifyMenuFlyoutCommandDeactivated(c2);
+                    OverlayHelpers.Assert.verifyMenuFlyoutCommandDeactivated(c2);
 
-                OverlayHelpers.disposeAndRemove(menu1Element);
-                OverlayHelpers.disposeAndRemove(menu2Element);
-                OverlayHelpers.disposeAndRemove(menu3Element);
-                complete();
-            });
+                    OverlayHelpers.disposeAndRemove(menu1Element);
+                    OverlayHelpers.disposeAndRemove(menu2Element);
+                    OverlayHelpers.disposeAndRemove(menu3Element);
+                    complete();
+                });
         };
 
-        testParentMenuMovesFocusToSubMenuWhenActivatedMenuCommandIsFocused = function(complete) {
+        testParentMenuMovesFocusToSubMenuWhenActivatedMenuCommandIsFocused = function (complete) {
             // Verifies that when a Menu contains a 'flyout' typed MenuCommand that is already activated, and that MenuCommand recieves focus,
             // then the Menu should move focus onto the element of the MenuCommand's subMenu and all of the subMenu's 'flyout' typed commands
             // should be deactivated.
@@ -574,7 +623,7 @@ module CorsicaTests {
             var parentMenuElement = document.createElement('div');
             parentMenuElement.id = "parentMenu";
             document.body.appendChild(parentMenuElement);
-            var parentMenu = new Menu(parentMenuElement, { anchor: parentMenuElement });
+            var parentMenu = new Menu(parentMenuElement, { anchor: document.body });
 
             var subMenuElement = document.createElement('div');
             subMenuElement.id = "subMenu";
@@ -611,17 +660,16 @@ module CorsicaTests {
             OverlayHelpers.show(parentMenu).then(() => {
                 return MenuCommand._activateFlyoutCommand(c1);
             }).then(() => {
-                OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(c1, "TEST ERROR: command needs to be activated before continuing");
-                return MenuCommand._activateFlyoutCommand(c2);
-            }).then(() => {
-                OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(c2, "TEST ERROR: command needs to be activated before continuing");
+                    OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(c1, "TEST ERROR: command needs to be activated before continuing");
+                    return MenuCommand._activateFlyoutCommand(c2);
+                }).then(() => {
+                    OverlayHelpers.Assert.verifyMenuFlyoutCommandActivated(c2, "TEST ERROR: command needs to be activated before continuing");
 
-                msg = "Focusing an activated command in the Parent Menu should move focus to that commands subMenu and deactivate all 'flyout' commands in the subMenu";
-                LiveUnit.LoggingCore.logComment("Test: " + msg);
-                c1.element.focus();
-            });
+                    msg = "Focusing an activated command in the Parent Menu should move focus to that commands subMenu and deactivate all 'flyout' commands in the subMenu";
+                    LiveUnit.LoggingCore.logComment("Test: " + msg);
+                    c1.element.focus();
+                });
         };
-
     }
 }
 // register the object as a test class by passing in the name
