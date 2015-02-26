@@ -397,6 +397,9 @@ declare module WinJS {
                 overflowButton: HTMLButtonElement;
                 overflowArea: HTMLElement;
             };
+            _renderer: {
+                _getCommandWidth: (command: ICommand) => number;
+            }
         }
 
         class PrivateToolBar extends WinJS.UI.ToolBar {

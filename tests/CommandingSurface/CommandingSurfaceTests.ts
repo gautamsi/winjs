@@ -614,8 +614,8 @@ module CorsicaTests {
                 data: data
             });
 
-            var customContent1Width = commandingSurface._getCommandWidth(data.getAt(1));
-            var customContent2Width = commandingSurface._getCommandWidth(data.getAt(2));
+            var customContent1Width = commandingSurface._renderer._getCommandWidth(data.getAt(1));
+            var customContent2Width = commandingSurface._renderer._getCommandWidth(data.getAt(2));
 
             // Make sure everything fits, nothing should overflow
             var args: ISizeForCommandsArgs = {
@@ -725,7 +725,7 @@ module CorsicaTests {
                 data: data
             });
 
-            var customContentWidth = commandingSurface._getCommandWidth(data.getAt(1));
+            var customContentWidth = commandingSurface._renderer._getCommandWidth(data.getAt(1));
 
             // Make sure everything fits, nothing should overflow
             var args: ISizeForCommandsArgs = {
@@ -1061,7 +1061,7 @@ module CorsicaTests {
                 data: data
             });
 
-            var customContentWidth = commandingSurface._getCommandWidth(data.getAt(1));
+            var customContentWidth = commandingSurface._renderer._getCommandWidth(data.getAt(1));
             var args: ISizeForCommandsArgs = {
                 numStandardCommands: 2,
                 additionalWidth: customContentWidth,
