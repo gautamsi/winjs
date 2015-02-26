@@ -233,9 +233,7 @@ export class _CommandingSurface {
             throw new _ErrorFromName("WinJS.UI._CommandingSurface.DuplicateConstruction", strings.duplicateConstruction);
         }
 
-        // Initialize DOM
         this._initializeDom(element || _Global.document.createElement("div"));
-
         this._machine = new _ShowHideMachine.ShowHideMachine({
             eventElement: this._dom.root,
             onShow: () => {
