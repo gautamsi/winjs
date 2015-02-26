@@ -327,7 +327,7 @@ export class _CommandingSurface {
         /// Forces the CommandingSurface to update its layout. Use this function when the window did not change size, but the container of the CommandingSurface changed size.
         /// </summary>
         /// </signature>
-        this._renderer.pendingLayoutPhase = CommandLayoutPipeline.measuringStage;
+        this._renderer.pendingLayout = CommandLayoutPipeline.measuringStage;
         this._machine.updateDom();
     }
 
@@ -446,7 +446,7 @@ export class _CommandingSurface {
                 }
             });
         }
-        this._renderer.pendingLayoutPhase = CommandLayoutPipeline.newDataStage;
+        this._renderer.pendingLayout = CommandLayoutPipeline.newDataStage;
         this._machine.updateDom();
     }
 
@@ -585,7 +585,7 @@ export class _CommandingSurface {
             var currentActionAreaWidth = _ElementUtilities.getContentWidth(this._dom.actionArea);
             if (this._renderer._cachedMeasurements.actionAreaContentBoxWidth !== currentActionAreaWidth) {
                 this._renderer._cachedMeasurements.actionAreaContentBoxWidth = currentActionAreaWidth
-                this._renderer.pendingLayoutPhase = CommandLayoutPipeline.positioningStage;
+                this._renderer.pendingLayout = CommandLayoutPipeline.positioningStage;
                 this._machine.updateDom();
             }
         }
@@ -615,16 +615,16 @@ export class _CommandingSurface_Renderer {
 
     control: _CommandingSurface;
 
-    get pendingLayoutPhase() {
-        return this._pendingLayoutPhase;
+    get pendingLayout() {
+        return this._pendingLayout;
     }
-    set pendingLayoutPhase(value: number) {
-        if (value > this._pendingLayoutPhase) {
-            this._pendingLayoutPhase = value;
+    set pendingLayout(value: number) {
+        if (value > this._pendingLayout) {
+            this._pendingLayout = value;
         }
     }
 
-    private _pendingLayoutPhase = CommandLayoutPipeline.idle;
+    private _pendingLayout = CommandLayoutPipeline.idle;
     private _disposed: boolean;
 
     constructor(commandingSurface: _CommandingSurface) {
@@ -666,29 +666,29 @@ export class _CommandingSurface_Renderer {
 
         var that = this;
 
-        var nextPhase = this.pendingLayoutPhase;
+        var nextStage = this.pendingLayout;
 
-        while (nextPhase) {
-            var currentPhase = nextPhase;
-            var currentPhaseCompleted = false;
+        while (nextStage) {
+            var currentStage = nextStage;
+            var currentStageCompleted = false;
 
-            switch (currentPhase) {
+            switch (currentStage) {
                 case CommandLayoutPipeline.newDataStage:
-                    nextPhase = CommandLayoutPipeline.measuringStage;
-                    currentPhaseCompleted = processNewData();
+                    nextStage = CommandLayoutPipeline.measuringStage;
+                    currentStageCompleted = processNewData();
                     break;
                 case CommandLayoutPipeline.measuringStage:
-                    nextPhase = CommandLayoutPipeline.positioningStage;
-                    currentPhaseCompleted = measure();
+                    nextStage = CommandLayoutPipeline.positioningStage;
+                    currentStageCompleted = measure();
                     break;
                 case CommandLayoutPipeline.positioningStage:
-                    nextPhase = CommandLayoutPipeline.idle;
-                    currentPhaseCompleted = positionCommands();
+                    nextStage = CommandLayoutPipeline.idle;
+                    currentStageCompleted = positionCommands();
                     break;
             }
 
-            if (!currentPhaseCompleted) {
-                this._pendingLayoutPhase = currentPhase;
+            if (!currentStageCompleted) {
+                this._pendingLayout = currentStage;
                 break;
             }
         }
