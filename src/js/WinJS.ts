@@ -1,5 +1,5 @@
 'use strict';
-var _WinJS = require('./WinJS/Core/_WinJS');
+import _WinJS = require('./WinJS/Core/_WinJS');
 //require('./WinJS/Core');
 require('./WinJS/Promise');
 //require('WinJS/_Signal');
@@ -43,7 +43,10 @@ require('./WinJS/Promise');
 //require('WinJS/Controls/ToolBar');
 //require('WinJS/Controls/SplitView');
 //require('WinJS/Controls/CommandingSurface');
+
 _WinJS.Namespace.define("WinJS.Utilities", {
-    _require: require,
+  _require: require,
+  //_define: define
 });
-module.exports = _WinJS;
+
+export = _WinJS;
