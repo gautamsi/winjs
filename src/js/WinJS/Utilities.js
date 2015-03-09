@@ -1,20 +1,17 @@
-// Copyright (c) Microsoft Corporation.  All Rights Reserved. Licensed under the MIT License. See License.txt in the project root for license information.
-define([
-    './Utilities/_Control',
-    './Utilities/_Dispose',
-    './Utilities/_ElementListUtilities',
-    './Utilities/_ElementUtilities',
-    './Utilities/_Hoverable',
-    './Utilities/_ItemsManager',
-    './Utilities/_KeyboardBehavior',
-    './Utilities/_ParallelWorkQueue',
-    './Utilities/_SafeHtml',
-    './Utilities/_Select',
-    './Utilities/_TabContainer',
-    './Utilities/_Telemetry',
-    './Utilities/_UI',
-    './Utilities/_VersionManager',
-    './Utilities/_Xhr' ], function () {
-
-    //wrapper module
-});
+'use strict';
+//require('./Utilities/_Control');
+//require('./Utilities/_Dispose');
+//require('./Utilities/_ElementListUtilities');
+//require('./Utilities/_ElementUtilities');
+//require('./Utilities/_Hoverable');
+//require('./Utilities/_ItemsManager');
+//require('./Utilities/_KeyboardBehavior');
+//require('./Utilities/_ParallelWorkQueue');
+//require('./Utilities/_SafeHtml');
+//require('./Utilities/_Select');
+//require('./Utilities/_TabContainer');
+//require('./Utilities/_Telemetry');
+//require('./Utilities/_UI');
+//require('./Utilities/_VersionManager');
+require('./Utilities/_Xhr');
+//wrapper module

@@ -25,10 +25,17 @@ interface Global {
   Debug?:any;
   navigator?:any;
   clearTimeout:any;
+  MSApp:any;
+  performance:any;
+  location:any;
+  console:any;
+  formatLog:any;
+  log:any;
 }
 
 'use strict'
-var _global: Global = this;
+declare var global;
+var _global: Global = window|| global;
 
 
 export = _global;
