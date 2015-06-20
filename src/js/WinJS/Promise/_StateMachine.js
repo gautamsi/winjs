@@ -1,13 +1,18 @@
 'use strict';
+var __extends = this.__extends || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    __.prototype = b.prototype;
+    d.prototype = new __();
+};
 var _Global = require('../Core/_Global');
 var _BaseCoreUtils = require('../Core/_BaseCoreUtils');
-var _Base = require('../Core/_Base');
 var _ErrorFromName = require('../Core/_ErrorFromName');
 var _Events = require('../Core/_Events');
 var _Trace = require('../Core/_Trace');
 _Global.Debug && (_Global.Debug.setNonUserCodeExceptions = true);
-var ListenerType = _Base.Class.mix(_Base.Class.define(null, {}, { supportedForProcessing: false }), _Events.eventMixin);
-var promiseEventListeners = new ListenerType();
+//var ListenerType = _Base.Class.mix(_Base.Class.define(null, { /*empty*/ }, { supportedForProcessing: false }), _Events.eventMixin);
+var promiseEventListeners = new _Events.EventListener();
 // make sure there is a listeners collection so that we can do a more trivial check below
 promiseEventListeners._listeners = {};
 var errorET = "error";
@@ -46,14 +51,14 @@ var error_number = 1;
 // its children into an (as appropriate) success or error state and also notify that child's
 // listeners of the state transition, until leaf notes are reached.
 //
-var state_created, state_working, state_waiting, state_waiting_canceled, state_canceled, state_canceling, state_success_notify, state_success, state_error_notify, state_error; // -> .
+exports.state_created; // -> working
+var state_working, state_waiting, state_waiting_canceled, state_canceled, state_canceling, state_success_notify, state_success, state_error_notify, state_error; // -> .
 // Noop function, used in the various states to indicate that they don't support a given
 // message. Named with the somewhat cute name '_' because it reads really well in the states.
-function _() {
-}
+function _() { }
 // Initial state
 //
-state_created = {
+exports.state_created = {
     name: "created",
     enter: function (promise) {
         promise._setState(state_working);
@@ -96,7 +101,9 @@ state_waiting = {
         // We can special case our own intermediate promises which are not in a
         //  terminal state by just pushing this promise as a listener without
         //  having to create new indirection functions
-        if (waitedUpon instanceof ThenPromise && waitedUpon._state !== state_error && waitedUpon._state !== state_success) {
+        if (waitedUpon instanceof ThenPromise &&
+            waitedUpon._state !== state_error &&
+            waitedUpon._state !== state_success) {
             pushListener(waitedUpon, { promise: promise });
         }
         else {
@@ -303,12 +310,14 @@ state_error = {
 // We could instead call directly through the promise states however then every caller
 // would have to remember to do things like pumping the state machine to catch state transitions.
 //
-var PromiseStateMachine = _Base.Class.define(null, {
-    _listeners: null,
-    _nextState: null,
-    _state: null,
-    _value: null,
-    cancel: function () {
+var PromiseStateMachine = (function () {
+    function PromiseStateMachine() {
+        this._listeners = null;
+        this._nextState = null;
+        this._state = null;
+        this._value = null;
+    }
+    PromiseStateMachine.prototype.cancel = function () {
         /// <signature helpKeyword="WinJS.PromiseStateMachine.cancel">
         /// <summary locid="WinJS.PromiseStateMachine.cancel">
         /// Attempts to cancel the fulfillment of a promised value. If the promise hasn't
@@ -318,8 +327,8 @@ var PromiseStateMachine = _Base.Class.define(null, {
         /// </signature>
         this._state.cancel(this);
         this._run();
-    },
-    done: function Promise_done(onComplete, onError, onProgress) {
+    };
+    PromiseStateMachine.prototype.done = function (onComplete, onError, onProgress) {
         /// <signature helpKeyword="WinJS.PromiseStateMachine.done">
         /// <summary locid="WinJS.PromiseStateMachine.done">
         /// Allows you to specify the work to be done on the fulfillment of the promised value,
@@ -349,8 +358,8 @@ var PromiseStateMachine = _Base.Class.define(null, {
         /// </param>
         /// </signature>
         this._state.done(this, onComplete, onError, onProgress);
-    },
-    then: function Promise_then(onComplete, onError, onProgress) {
+    };
+    PromiseStateMachine.prototype.then = function (onComplete, onError, onProgress) {
         /// <signature helpKeyword="WinJS.PromiseStateMachine.then">
         /// <summary locid="WinJS.PromiseStateMachine.then">
         /// Allows you to specify the work to be done on the fulfillment of the promised value,
@@ -380,52 +389,53 @@ var PromiseStateMachine = _Base.Class.define(null, {
         /// </returns>
         /// </signature>
         return this._state.then(this, onComplete, onError, onProgress);
-    },
-    _chainedError: function (value, context) {
+    };
+    PromiseStateMachine.prototype._chainedError = function (value, context) {
         var result = this._state._error(this, value, detailsForChainedError, context);
         this._run();
         return result;
-    },
-    _completed: function (value) {
+    };
+    PromiseStateMachine.prototype._completed = function (value) {
         var result = this._state._completed(this, value);
         this._run();
         return result;
-    },
-    _error: function (value) {
+    };
+    PromiseStateMachine.prototype._error = function (value) {
         var result = this._state._error(this, value, detailsForError);
         this._run();
         return result;
-    },
-    _progress: function (value) {
+    };
+    PromiseStateMachine.prototype._progress = function (value) {
         this._state._progress(this, value);
-    },
-    _setState: function (state) {
+    };
+    PromiseStateMachine.prototype._setState = function (state) {
         this._nextState = state;
-    },
-    _setCompleteValue: function (value) {
+    };
+    PromiseStateMachine.prototype._setCompleteValue = function (value) {
         this._state._setCompleteValue(this, value);
         this._run();
-    },
-    _setChainedErrorValue: function (value, context) {
+    };
+    PromiseStateMachine.prototype._setChainedErrorValue = function (value, context) {
         var result = this._state._setErrorValue(this, value, detailsForChainedError, context);
         this._run();
         return result;
-    },
-    _setExceptionValue: function (value) {
+    };
+    PromiseStateMachine.prototype._setExceptionValue = function (value) {
         var result = this._state._setErrorValue(this, value, detailsForException);
         this._run();
         return result;
-    },
-    _run: function () {
+    };
+    PromiseStateMachine.prototype._run = function () {
         while (this._nextState) {
             this._state = this._nextState;
             this._nextState = null;
             this._state.enter(this);
         }
-    }
-}, {
-    supportedForProcessing: false
-});
+    };
+    PromiseStateMachine.supportedForProcessing = false;
+    return PromiseStateMachine;
+})();
+exports.PromiseStateMachine = PromiseStateMachine;
 //
 // Implementations of shared state machine code.
 //
@@ -578,8 +588,7 @@ function progress(promise, value) {
                 try {
                     onProgress(value);
                 }
-                catch (ex) {
-                }
+                catch (ex) { }
             }
             if (!(listener.c || listener.e) && listener.promise) {
                 listener.promise._progress(value);
@@ -634,39 +643,46 @@ function then(promise, onComplete, onError, onProgress) {
 // Internal implementation detail promise, ThenPromise is created when a promise needs
 // to be returned from a then() method.
 //
-var ThenPromise = _Base.Class.derive(PromiseStateMachine, function (creator) {
-    if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.thenPromise))) {
-        this._stack = Promise._getStack();
+var ThenPromise = (function (_super) {
+    __extends(ThenPromise, _super);
+    function ThenPromise(creator) {
+        _super.call(this);
+        this._creator = null;
+        this._stack = null;
+        if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.thenPromise))) {
+            this._stack = Promise._getStack();
+        }
+        this._creator = creator;
+        this._setState(exports.state_created);
+        this._run();
     }
-    this._creator = creator;
-    this._setState(state_created);
-    this._run();
-}, {
-    _creator: null,
-    _cancelAction: function () {
+    ThenPromise.prototype._cancelAction = function () {
         if (this._creator) {
             this._creator.cancel();
         }
-    },
-    _cleanupAction: function () {
+    };
+    ThenPromise.prototype._cleanupAction = function () {
         this._creator = null;
-    }
-}, {
-    supportedForProcessing: false
-});
+    };
+    ThenPromise.supportedForProcessing = false;
+    return ThenPromise;
+})(PromiseStateMachine);
 //
 // Slim promise implementations for already completed promises, these are created
 // under the hood on synchronous completion paths as well as by WinJS.Promise.wrap
 // and WinJS.Promise.wrapError.
 //
-var ErrorPromise = _Base.Class.define(function ErrorPromise_ctor(value) {
-    if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.errorPromise))) {
-        this._stack = Promise._getStack();
+var ErrorPromise = (function () {
+    function ErrorPromise(value) {
+        this._value = null;
+        this._stack = null;
+        if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.errorPromise))) {
+            this._stack = Promise._getStack();
+        }
+        this._value = value;
+        callonerror(this, value, detailsForError);
     }
-    this._value = value;
-    callonerror(this, value, detailsForError);
-}, {
-    cancel: function () {
+    ErrorPromise.prototype.cancel = function () {
         /// <signature helpKeyword="WinJS.PromiseStateMachine.cancel">
         /// <summary locid="WinJS.PromiseStateMachine.cancel">
         /// Attempts to cancel the fulfillment of a promised value. If the promise hasn't
@@ -674,8 +690,8 @@ var ErrorPromise = _Base.Class.define(function ErrorPromise_ctor(value) {
         /// the error state with a value of Error("Canceled").
         /// </summary>
         /// </signature>
-    },
-    done: function ErrorPromise_done(unused, onError) {
+    };
+    ErrorPromise.prototype.done = function (unused, onError) {
         /// <signature helpKeyword="WinJS.PromiseStateMachine.done">
         /// <summary locid="WinJS.PromiseStateMachine.done">
         /// Allows you to specify the work to be done on the fulfillment of the promised value,
@@ -728,8 +744,8 @@ var ErrorPromise = _Base.Class.define(function ErrorPromise_ctor(value) {
         // force the exception to be thrown asyncronously to avoid any try/catch blocks
         //
         Promise._doneHandler(value);
-    },
-    then: function ErrorPromise_then(unused, onError) {
+    };
+    ErrorPromise.prototype.then = function (unused, onError) {
         /// <signature helpKeyword="WinJS.PromiseStateMachine.then">
         /// <summary locid="WinJS.PromiseStateMachine.then">
         /// Allows you to specify the work to be done on the fulfillment of the promised value,
@@ -784,31 +800,38 @@ var ErrorPromise = _Base.Class.define(function ErrorPromise_ctor(value) {
             }
         }
         return result;
+    };
+    ErrorPromise.supportedForProcessing = false;
+    return ErrorPromise;
+})();
+var ExceptionPromise = (function (_super) {
+    __extends(ExceptionPromise, _super);
+    function ExceptionPromise(value) {
+        _super.call(this, value);
+        if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.exceptionPromise))) {
+            this._stack = Promise._getStack();
+        }
+        this._value = value;
+        callonerror(this, value, detailsForException);
     }
-}, {
-    supportedForProcessing: false
-});
-var ExceptionPromise = _Base.Class.derive(ErrorPromise, function ExceptionPromise_ctor(value) {
-    if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.exceptionPromise))) {
-        this._stack = Promise._getStack();
+    ExceptionPromise.supportedForProcessing = false;
+    return ExceptionPromise;
+})(ErrorPromise);
+var CompletePromise = (function () {
+    function CompletePromise(value) {
+        this._value = null;
+        this._stack = null;
+        if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.completePromise))) {
+            this._stack = Promise._getStack();
+        }
+        if (value && typeof value === "object" && typeof value.then === "function") {
+            var result = new ThenPromise(null);
+            result._setCompleteValue(value);
+            return result;
+        }
+        this._value = value;
     }
-    this._value = value;
-    callonerror(this, value, detailsForException);
-}, {}, {
-    supportedForProcessing: false
-});
-var CompletePromise = _Base.Class.define(function CompletePromise_ctor(value) {
-    if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.completePromise))) {
-        this._stack = Promise._getStack();
-    }
-    if (value && typeof value === "object" && typeof value.then === "function") {
-        var result = new ThenPromise(null);
-        result._setCompleteValue(value);
-        return result;
-    }
-    this._value = value;
-}, {
-    cancel: function () {
+    CompletePromise.prototype.cancel = function () {
         /// <signature helpKeyword="WinJS.PromiseStateMachine.cancel">
         /// <summary locid="WinJS.PromiseStateMachine.cancel">
         /// Attempts to cancel the fulfillment of a promised value. If the promise hasn't
@@ -816,8 +839,8 @@ var CompletePromise = _Base.Class.define(function CompletePromise_ctor(value) {
         /// the error state with a value of Error("Canceled").
         /// </summary>
         /// </signature>
-    },
-    done: function CompletePromise_done(onComplete) {
+    };
+    CompletePromise.prototype.done = function (onComplete) {
         /// <signature helpKeyword="WinJS.PromiseStateMachine.done">
         /// <summary locid="WinJS.PromiseStateMachine.done">
         /// Allows you to specify the work to be done on the fulfillment of the promised value,
@@ -859,8 +882,36 @@ var CompletePromise = _Base.Class.define(function CompletePromise_ctor(value) {
             // force the exception to be thrown asynchronously to avoid any try/catch blocks
             Promise._doneHandler(ex);
         }
-    },
-    then: function CompletePromise_then(onComplete) {
+    };
+    CompletePromise.prototype.then = function (onComplete) {
+        /// <signature helpKeyword="WinJS.PromiseStateMachine.then">
+        /// <summary locid="WinJS.PromiseStateMachine.then">
+        /// Allows you to specify the work to be done on the fulfillment of the promised value,
+        /// the error handling to be performed if the promise fails to fulfill
+        /// a value, and the handling of progress notifications along the way.
+        /// </summary>
+        /// <param name='onComplete' type='Function' locid="WinJS.PromiseStateMachine.then_p:onComplete">
+        /// The function to be called if the promise is fulfilled successfully with a value.
+        /// The value is passed as the single argument. If the value is null, the value is returned.
+        /// The value returned from the function becomes the fulfilled value of the promise returned by
+        /// then(). If an exception is thrown while this function is being executed, the promise returned
+        /// by then() moves into the error state.
+        /// </param>
+        /// <param name='onError' type='Function' optional='true' locid="WinJS.PromiseStateMachine.then_p:onError">
+        /// The function to be called if the promise is fulfilled with an error. The error
+        /// is passed as the single argument. If it is null, the error is forwarded.
+        /// The value returned from the function becomes the fulfilled value of the promise returned by then().
+        /// </param>
+        /// <param name='onProgress' type='Function' optional='true' locid="WinJS.PromiseStateMachine.then_p:onProgress">
+        /// The function to be called if the promise reports progress. Data about the progress
+        /// is passed as the single argument. Promises are not required to support
+        /// progress.
+        /// </param>
+        /// <returns type="WinJS.Promise" locid="WinJS.PromiseStateMachine.then_returnValue">
+        /// The promise whose value is the result of executing the complete or
+        /// error function.
+        /// </returns>
+        /// </signature>
         try {
             // If the value returned from the completion handler is the same as the value
             // provided to the completion handler then there is no need for a new promise.
@@ -871,10 +922,10 @@ var CompletePromise = _Base.Class.define(function CompletePromise_ctor(value) {
         catch (ex) {
             return new ExceptionPromise(ex);
         }
-    }
-}, {
-    supportedForProcessing: false
-});
+    };
+    CompletePromise.supportedForProcessing = false;
+    return CompletePromise;
+})();
 //
 // Promise is the user-creatable WinJS.Promise object.
 //
@@ -894,66 +945,79 @@ function timeout(timeoutMS) {
     });
 }
 function timeoutWithPromise(timeout, promise) {
-    var cancelPromise = function () {
-        promise.cancel();
-    };
-    var cancelTimeout = function () {
-        timeout.cancel();
-    };
+    var cancelPromise = function () { promise.cancel(); };
+    var cancelTimeout = function () { timeout.cancel(); };
     timeout.then(cancelPromise);
     promise.then(cancelTimeout, cancelTimeout);
     return promise;
 }
 var staticCanceledPromise;
-var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init, oncancel) {
-    /// <signature helpKeyword="WinJS.Promise">
-    /// <summary locid="WinJS.Promise">
-    /// A promise provides a mechanism to schedule work to be done on a value that
-    /// has not yet been computed. It is a convenient abstraction for managing
-    /// interactions with asynchronous APIs.
-    /// </summary>
-    /// <param name="init" type="Function" locid="WinJS.Promise_p:init">
-    /// The function that is called during construction of the  promise. The function
-    /// is given three arguments (complete, error, progress). Inside this function
-    /// you should add event listeners for the notifications supported by this value.
-    /// </param>
-    /// <param name="oncancel" optional="true" locid="WinJS.Promise_p:oncancel">
-    /// The function to call if a consumer of this promise wants
-    /// to cancel its undone work. Promises are not required to
-    /// support cancellation.
-    /// </param>
-    /// </signature>
-    if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.promise))) {
-        this._stack = Promise._getStack();
+var Promise = (function (_super) {
+    __extends(Promise, _super);
+    function Promise(init, oncancel) {
+        /// <signature helpKeyword="WinJS.Promise">
+        /// <summary locid="WinJS.Promise">
+        /// A promise provides a mechanism to schedule work to be done on a value that
+        /// has not yet been computed. It is a convenient abstraction for managing
+        /// interactions with asynchronous APIs.
+        /// </summary>
+        /// <param name="init" type="Function" locid="WinJS.Promise_p:init">
+        /// The function that is called during construction of the  promise. The function
+        /// is given three arguments (complete, error, progress). Inside this function
+        /// you should add event listeners for the notifications supported by this value.
+        /// </param>
+        /// <param name="oncancel" optional="true" locid="WinJS.Promise_p:oncancel">
+        /// The function to call if a consumer of this promise wants
+        /// to cancel its undone work. Promises are not required to
+        /// support cancellation.
+        /// </param>
+        /// </signature>
+        _super.call(this);
+        this._oncancel = null;
+        this._stack = null;
+        if (tagWithStack && (tagWithStack === true || (tagWithStack & tag.promise))) {
+            this._stack = Promise._getStack();
+        }
+        this._oncancel = oncancel;
+        this._setState(exports.state_created);
+        this._run();
+        try {
+            var complete = this._completed.bind(this);
+            var error = this._error.bind(this);
+            var progress = this._progress.bind(this);
+            init(complete, error, progress);
+        }
+        catch (ex) {
+            this._setExceptionValue(ex);
+        }
     }
-    this._oncancel = oncancel;
-    this._setState(state_created);
-    this._run();
-    try {
-        var complete = this._completed.bind(this);
-        var error = this._error.bind(this);
-        var progress = this._progress.bind(this);
-        init(complete, error, progress);
-    }
-    catch (ex) {
-        this._setExceptionValue(ex);
-    }
-}, {
-    _oncancel: null,
-    _cancelAction: function () {
+    Object.defineProperty(Promise.prototype, "_veryExpensiveTagWithStack", {
+        get: function () { return tagWithStack; },
+        set: function (value) { tagWithStack = value; },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Promise, "cancel", {
+        /// <field type="WinJS.Promise" helpKeyword="WinJS.Promise.cancel" locid="WinJS.Promise.cancel">
+        /// Canceled promise value, can be returned from a promise completion handler
+        /// to indicate cancelation of the promise chain.
+        /// </field>
+        get: function () {
+            return (staticCanceledPromise = staticCanceledPromise || new ErrorPromise(new _ErrorFromName(canceledName)));
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Promise.prototype._cancelAction = function () {
         if (this._oncancel) {
             try {
                 this._oncancel();
             }
-            catch (ex) {
-            }
+            catch (ex) { }
         }
-    },
-    _cleanupAction: function () {
-        this._oncancel = null;
-    }
-}, {
-    addEventListener: function Promise_addEventListener(eventType, listener, capture) {
+    };
+    Promise.prototype._cleanupAction = function () { this._oncancel = null; };
+    Promise.addEventListener = function (eventType, listener, capture) {
         /// <signature helpKeyword="WinJS.Promise.addEventListener">
         /// <summary locid="WinJS.Promise.addEventListener">
         /// Adds an event listener to the control.
@@ -969,8 +1033,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
         /// </param>
         /// </signature>
         promiseEventListeners.addEventListener(eventType, listener, capture);
-    },
-    any: function Promise_any(values) {
+    };
+    Promise.any = function (values) {
         /// <signature helpKeyword="WinJS.Promise.any">
         /// <summary locid="WinJS.Promise.any">
         /// Returns a promise that is fulfilled when one of the input promises
@@ -991,9 +1055,7 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
             }
             var canceled = 0;
             keys.forEach(function (key) {
-                Promise.as(values[key]).then(function () {
-                    complete({ key: key, value: values[key] });
-                }, function (e) {
+                Promise.as(values[key]).then(function () { complete({ key: key, value: values[key] }); }, function (e) {
                     if (e instanceof Error && e.name === canceledName) {
                         if ((++canceled) === keys.length) {
                             complete(Promise.cancel);
@@ -1012,8 +1074,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
                 }
             });
         });
-    },
-    as: function Promise_as(value) {
+    };
+    Promise.as = function (value) {
         /// <signature helpKeyword="WinJS.Promise.as">
         /// <summary locid="WinJS.Promise.as">
         /// Returns a promise. If the object is already a promise it is returned;
@@ -1030,17 +1092,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
             return value;
         }
         return new CompletePromise(value);
-    },
-    /// <field type="WinJS.Promise" helpKeyword="WinJS.Promise.cancel" locid="WinJS.Promise.cancel">
-    /// Canceled promise value, can be returned from a promise completion handler
-    /// to indicate cancelation of the promise chain.
-    /// </field>
-    cancel: {
-        get: function () {
-            return (staticCanceledPromise = staticCanceledPromise || new ErrorPromise(new _ErrorFromName(canceledName)));
-        }
-    },
-    dispatchEvent: function Promise_dispatchEvent(eventType, details) {
+    };
+    Promise.dispatchEvent = function (eventType, details) {
         /// <signature helpKeyword="WinJS.Promise.dispatchEvent">
         /// <summary locid="WinJS.Promise.dispatchEvent">
         /// Raises an event of the specified type and properties.
@@ -1056,8 +1109,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
         /// </returns>
         /// </signature>
         return promiseEventListeners.dispatchEvent(eventType, details);
-    },
-    is: function Promise_is(value) {
+    };
+    Promise.is = function (value) {
         /// <signature helpKeyword="WinJS.Promise.is">
         /// <summary locid="WinJS.Promise.is">
         /// Determines whether a value fulfills the promise contract.
@@ -1070,8 +1123,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
         /// </returns>
         /// </signature>
         return value && typeof value === "object" && typeof value.then === "function";
-    },
-    join: function Promise_join(values) {
+    };
+    Promise.join = function (values) {
         /// <signature helpKeyword="WinJS.Promise.join">
         /// <summary locid="WinJS.Promise.join">
         /// Creates a promise that is fulfilled when all the values are fulfilled.
@@ -1122,13 +1175,7 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
                     undefineds++;
                 }
                 else {
-                    Promise.then(value, function (value) {
-                        results[key] = value;
-                        argDone(key);
-                    }, function (value) {
-                        errors[key] = value;
-                        argDone(key);
-                    });
+                    Promise.then(value, function (value) { results[key] = value; argDone(key); }, function (value) { errors[key] = value; argDone(key); });
                 }
             });
             pending -= undefineds;
@@ -1144,8 +1191,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
                 }
             });
         });
-    },
-    removeEventListener: function Promise_removeEventListener(eventType, listener, capture) {
+    };
+    Promise.removeEventListener = function (eventType, listener, capture) {
         /// <signature helpKeyword="WinJS.Promise.removeEventListener">
         /// <summary locid="WinJS.Promise.removeEventListener">
         /// Removes an event listener from the control.
@@ -1161,9 +1208,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
         /// </param>
         /// </signature>
         promiseEventListeners.removeEventListener(eventType, listener, capture);
-    },
-    supportedForProcessing: false,
-    then: function Promise_then(value, onComplete, onError, onProgress) {
+    };
+    Promise.then = function (value, onComplete, onError, onProgress) {
         /// <signature helpKeyword="WinJS.Promise.then">
         /// <summary locid="WinJS.Promise.then">
         /// A static version of the promise instance method then().
@@ -1190,8 +1236,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
         /// </returns>
         /// </signature>
         return Promise.as(value).then(onComplete, onError, onProgress);
-    },
-    thenEach: function Promise_thenEach(values, onComplete, onError, onProgress) {
+    };
+    Promise.thenEach = function (values, onComplete, onError, onProgress) {
         /// <signature helpKeyword="WinJS.Promise.thenEach">
         /// <summary locid="WinJS.Promise.thenEach">
         /// Performs an operation on all the input promises and returns a promise
@@ -1224,8 +1270,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
             result[key] = Promise.as(values[key]).then(onComplete, onError, onProgress);
         });
         return Promise.join(result);
-    },
-    timeout: function Promise_timeout(time, promise) {
+    };
+    Promise.timeout = function (time, promise) {
         /// <signature helpKeyword="WinJS.Promise.timeout">
         /// <summary locid="WinJS.Promise.timeout">
         /// Creates a promise that is fulfilled after a timeout.
@@ -1244,8 +1290,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
         /// </signature>
         var to = timeout(time);
         return promise ? timeoutWithPromise(to, promise) : to;
-    },
-    wrap: function Promise_wrap(value) {
+    };
+    Promise.wrap = function (value) {
         /// <signature helpKeyword="WinJS.Promise.wrap">
         /// <summary locid="WinJS.Promise.wrap">
         /// Wraps a non-promise value in a promise. You can use this function if you need
@@ -1259,8 +1305,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
         /// </returns>
         /// </signature>
         return new CompletePromise(value);
-    },
-    wrapError: function Promise_wrapError(error) {
+    };
+    Promise.wrapError = function (error) {
         /// <signature helpKeyword="WinJS.Promise.wrapError">
         /// <summary locid="WinJS.Promise.wrapError">
         /// Wraps a non-promise error value in a promise. You can use this function if you need
@@ -1274,27 +1320,8 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
         /// </returns>
         /// </signature>
         return new ErrorPromise(error);
-    },
-    _veryExpensiveTagWithStack: {
-        get: function () {
-            return tagWithStack;
-        },
-        set: function (value) {
-            tagWithStack = value;
-        }
-    },
-    _veryExpensiveTagWithStack_tag: tag,
-    _getStack: function () {
-        if (_Global.Debug && _Global.Debug.debuggerEnabled) {
-            try {
-                throw new Error();
-            }
-            catch (e) {
-                return e.stack;
-            }
-        }
-    },
-    _cancelBlocker: function Promise__cancelBlocker(input, oncancel) {
+    };
+    Promise._cancelBlocker = function (input, oncancel) {
         //
         // Returns a promise which on cancelation will still result in downstream cancelation while
         //  protecting the promise 'input' from being  canceled which has the effect of allowing
@@ -1313,23 +1340,33 @@ var Promise = _Base.Class.derive(PromiseStateMachine, function Promise_ctor(init
             error = null;
             oncancel && oncancel();
         });
-        input.then(function (v) {
-            complete && complete(v);
-        }, function (e) {
-            error && error(e);
-        });
+        input.then(function (v) { complete && complete(v); }, function (e) { error && error(e); });
         return output;
-    },
-});
+    };
+    Promise._getStack = function () {
+        if (_Global.Debug && _Global.Debug.debuggerEnabled) {
+            try {
+                throw new Error();
+            }
+            catch (e) {
+                return e.stack;
+            }
+        }
+    };
+    Promise.supportedForProcessing = false;
+    Promise._veryExpensiveTagWithStack_tag = tag;
+    Promise._doneHandler = function (value) {
+        _BaseCoreUtils._setImmediate(function Promise_done_rethrow() {
+            throw value;
+        });
+    };
+    return Promise;
+})(PromiseStateMachine);
+exports.Promise = Promise;
 Object.defineProperties(Promise, _Events.createEventProperties(errorET));
-Promise._doneHandler = function (value) {
-    _BaseCoreUtils._setImmediate(function Promise_done_rethrow() {
-        throw value;
-    });
-};
-var _export = {
-    PromiseStateMachine: PromiseStateMachine,
-    Promise: Promise,
-    state_created: state_created
-};
-module.exports = _export;
+// var _export = {
+//     PromiseStateMachine: PromiseStateMachine,
+//     Promise: Promise,
+//     state_created: state_created
+// };
+// export = _export;

@@ -9497,3 +9497,8 @@ declare module WinJS.Utilities.Scheduler {
     //#endregion Functions
 
 }
+
+declare module "WinJS"{
+    import _temp = WinJS;
+    export =_temp;
+}

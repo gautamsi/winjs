@@ -24,18 +24,24 @@ interface Global {
   msSetWeakWinRTProperty?:any;
   Debug?:any;
   navigator?:any;
-  clearTimeout:any;
-  MSApp:any;
-  performance:any;
-  location:any;
-  console:any;
-  formatLog:any;
-  log:any;
+  clearTimeout?:any;
+  MSApp?:any;
+  performance?:any;
+  location?:any;
+  console?:any;
+  formatLog?:any;
+  log?:any;
+  HTMLIFrameElement?:any;
+  frames?:any;
+  requestAnimationFrame?:any;
+  cancelAnimationFrame?:any;
 }
 
 'use strict'
 declare var global;
+declare var window;
+var window = window || undefined;
 var _global: Global = window|| global;
-
+//console.log(_global);
 
 export = _global;

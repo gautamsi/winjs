@@ -1,11 +1,13 @@
+/// <reference path="../../../../typings/winjs/winjs.d.ts" />
+/// <reference path="../../../../typings/xhr2.d.ts" />
 'use strict';
 import _Global = require('../Core/_Global');
 import _Base = require('../Core/_Base');
-import Promise = require('../Promise');
+import {Promise} from '../Promise';
 import Scheduler = require('../Scheduler');
 
-import xr = require('xmlhttprequest');
-//import XMLHttpRequest = xhr.XMLHttpRequest;
+import XMLHttpRequestModule = require('xhr2');
+
 function schedule(f, arg, priority) {
   Scheduler.schedule(function xhr_callback() {
     f(arg);
@@ -17,7 +19,7 @@ function noop() {
 
 var schemeRegex = /^(\w+)\:\/\//;
 
-function xhr(options) {
+export function xhr(options: WinJS.IXHROptions): WinJS.IPromise<any> {
   /// <signature helpKeyword="WinJS.xhr">
   /// <summary locid="WinJS.xhr">
   /// Wraps calls to XMLHttpRequest in a promise.
@@ -35,8 +37,8 @@ function xhr(options) {
     function(c, e, p) {
       /// <returns value="c(new XMLHttpRequest())" locid="WinJS.xhr.constructor._returnValue" />
       var priority = Scheduler.currentPriority;
-      req = new xr.XMLHttpRequest();
 
+      req = new XMLHttpRequestModule.XMLHttpRequest();
       var isLocalRequest = false;
       var schemeMatch = schemeRegex.exec(options.url.toLowerCase());
       if (schemeMatch) {
@@ -46,7 +48,6 @@ function xhr(options) {
       } else if (_Global.location.protocol === 'file:') {
         isLocalRequest = true;
       }
-
 
       req.onreadystatechange = function() {
         if (req._canceled) {
@@ -71,9 +72,9 @@ function xhr(options) {
         options.url
       // Promise based XHR does not support sync.
       //
-        //true,
-        //options.user,
-        //options.password
+      //true,
+      //options.user,
+      //options.password
         );
       //req.responseType = options.responseType || "";
 
@@ -98,9 +99,3 @@ function xhr(options) {
     }
     );
 }
-
-_Base.Namespace.define("WinJS", {
-  xhr: xhr
-});
-
-export = xhr;

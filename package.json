@@ -51,5 +51,8 @@
   },
   "browserify": {
     "transform": "deamdify"
+  },
+  "dependencies": {
+    "xhr2": "^0.1.2"
   }
 }

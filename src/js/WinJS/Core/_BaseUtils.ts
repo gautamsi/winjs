@@ -1,12 +1,11 @@
 'use strict';
-import exports = require('exports');
+declare var exports;
 import _Global = require('./_Global');
 import _Base = require('./_Base');
 import _BaseCoreUtils = require('./_BaseCoreUtils');
 import _ErrorFromName = require('./_ErrorFromName');
-import _Resources = require('./_Resources');
 import _Trace = require('./_Trace');
-import Promise = require('../Promise');
+import {Promise} from '../Promise';
 import Scheduler = require('../Scheduler');
 
 var strings = {
@@ -396,7 +395,7 @@ _Base.Namespace._moduleDefine(exports, "WinJS.Utilities", {
         return value;
       }
 
-      throw new _ErrorFromName("WinJS.Utilities.requireSupportedForProcessing", _Resources._formatString(strings.notSupportedForProcessing, value));
+      throw new _ErrorFromName("WinJS.Utilities.requireSupportedForProcessing");// _Resources._formatString(strings.notSupportedForProcessing, value));
     },
     configurable: false,
     writable: false,

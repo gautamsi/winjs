@@ -7,7 +7,7 @@ var _Log = require('./Core/_Log');
 //import _Resources = require('./Core/_Resources');
 var _Trace = require('./Core/_Trace');
 var _WriteProfilerMark = require('./Core/_WriteProfilerMark');
-var Promise = require('./Promise');
+var Promise_1 = require('./Promise');
 //export enum Priority {
 //    max= 15,
 //    high= 13,
@@ -65,9 +65,7 @@ _Base.Namespace.define("WinJS.Utilities", {
     _linkedListMixin: linkedListMixin
 });
 var strings = {
-    get jobInfoIsNoLongerValid() {
-        return "The job info object can only be used while the job is running";
-    }
+    get jobInfoIsNoLongerValid() { return "The job info object can only be used while the job is running"; }
 };
 //
 // Profiler mark helpers
@@ -89,11 +87,15 @@ function profilerMarkArgs(arg0, arg1, arg2) {
     }
 }
 function schedulerProfilerMark(operation, markerType, arg0, arg1) {
-    _WriteProfilerMark("WinJS.Scheduler:" + operation + profilerMarkArgs(arg0, arg1) + "," + markerType);
+    _WriteProfilerMark("WinJS.Scheduler:" + operation +
+        profilerMarkArgs(arg0, arg1) +
+        "," + markerType);
 }
 function jobProfilerMark(job, operation, markerType, arg0, arg1) {
     var argProvided = job.name || arg0 !== undefined || arg1 !== undefined;
-    _WriteProfilerMark("WinJS.Scheduler:" + operation + ":" + job.id + (argProvided ? profilerMarkArgs(job.name, arg0, arg1) : "") + "," + markerType);
+    _WriteProfilerMark("WinJS.Scheduler:" + operation + ":" + job.id +
+        (argProvided ? profilerMarkArgs(job.name, arg0, arg1) : "") +
+        "," + markerType);
 }
 //
 // Job type. This cannot be instantiated by developers and is instead handed back by the scheduler
@@ -114,36 +116,26 @@ var JobNode = _Base.Class.define(function (id, work, priority, context, name, as
     /// and false if it hasn't yet run or was canceled.
     /// </field>
     completed: {
-        get: function () {
-            return !!this._state.completed;
-        }
+        get: function () { return !!this._state.completed; }
     },
     /// <field type="Number" locid="WinJS.Utilities.Scheduler._JobNode.id" helpKeyword="WinJS.Utilities.Scheduler._JobNode.id">
     /// Gets the unique identifier for this job.
     /// </field>
     id: {
-        get: function () {
-            return this._id;
-        }
+        get: function () { return this._id; }
     },
     /// <field type="String" locid="WinJS.Utilities.Scheduler._JobNode.name" helpKeyword="WinJS.Utilities.Scheduler._JobNode.name">
     /// Gets or sets a string that specifies the diagnostic name for this job.
     /// </field>
     name: {
-        get: function () {
-            return this._name;
-        },
-        set: function (value) {
-            this._name = value;
-        }
+        get: function () { return this._name; },
+        set: function (value) { this._name = value; }
     },
     /// <field type="WinJS.Utilities.Scheduler._OwnerToken" locid="WinJS.Utilities.Scheduler._JobNode.owner" helpKeyword="WinJS.Utilities.Scheduler._JobNode.owner">
     /// Gets an owner token for the job. You can use this owner token's cancelAll method to cancel related jobs.
     /// </field>
     owner: {
-        get: function () {
-            return this._owner;
-        },
+        get: function () { return this._owner; },
         set: function (value) {
             this._owner && this._owner._remove(this);
             this._owner = value;
@@ -154,9 +146,7 @@ var JobNode = _Base.Class.define(function (id, work, priority, context, name, as
     /// Gets or sets the priority at which this job is executed by the scheduler.
     /// </field>
     priority: {
-        get: function () {
-            return this._priority;
-        },
+        get: function () { return this._priority; },
         set: function (value) {
             value = clampPriority(value);
             this._state.setPriority(this, value);
@@ -314,6 +304,7 @@ function _() {
     return false;
 }
 function illegal(job) {
+    /*jshint validthis: true */
     throw "Illegal call by job(" + job.id + ") in state: " + this.name;
 }
 //
@@ -571,7 +562,7 @@ state_blocked.enter = function (job, work, initialPriority) {
         }
         jobProfilerMark(job, "job-blocked", "StopTM");
         job._setState(state_canceled);
-        return Promise.wrapError(error);
+        return Promise_1.Promise.wrapError(error);
     });
 };
 // Blocked waiting
@@ -609,7 +600,7 @@ state_blocked_paused.enter = function (job, work, initialPriority) {
         }
         jobProfilerMark(job, "job-blocked", "StopTM");
         job._setState(state_canceled);
-        return Promise.wrapError(error);
+        return Promise_1.Promise.wrapError(error);
     });
 };
 // Blocked paused waiting
@@ -764,7 +755,12 @@ function retrieveState() {
     /// </signature>
     var output = "";
     function logJob(job, isRunning) {
-        output += "    " + (isRunning ? "*" : " ") + "id: " + job.id + ", priority: " + markerFromPriority(job.priority).name + (job.name ? ", name: " + job.name : "") + "\n";
+        output +=
+            "    " + (isRunning ? "*" : " ") +
+                "id: " + job.id +
+                ", priority: " + markerFromPriority(job.priority).name +
+                (job.name ? ", name: " + job.name : "") +
+                "\n";
     }
     output += "Jobs:\n";
     var current = markerFromPriority(highWaterMark);
@@ -785,7 +781,11 @@ function retrieveState() {
     }
     output += "Drain requests:\n";
     for (var i = 0, len = drainQueue.length; i < len; i++) {
-        output += "    " + (i === 0 ? "*" : " ") + "priority: " + markerFromPriority(drainQueue[i].priority).name + ", name: " + drainQueue[i].name + "\n";
+        output +=
+            "    " + (i === 0 ? "*" : " ") +
+                "priority: " + markerFromPriority(drainQueue[i].priority).name +
+                ", name: " + drainQueue[i].name +
+                "\n";
     }
     if (drainQueue.length === 0) {
         output += "     None\n";
@@ -1063,6 +1063,8 @@ function run(scheduled) {
             }
             return false;
         };
+        // Run until we run out of jobs or decide it is time to yield
+        //
         while (highWaterMark >= Priority.min && !shouldYield() && !yieldForPriorityBoundary) {
             didWork = false;
             current = markerFromPriority(highWaterMark)._nextJob;
@@ -1099,7 +1101,8 @@ function run(scheduled) {
                     highWaterMark = current.priority;
                     didWork = notifyDrainListeners();
                     var wwaHighWaterMark = toWwaPriority(highWaterMark);
-                    if (isHigherWwaPriority(wwaPrevHighWaterMark, wwaHighWaterMark) && (!usingWwaScheduler || MSApp.isTaskScheduledAtPriorityOrHigher(wwaHighWaterMark))) {
+                    if (isHigherWwaPriority(wwaPrevHighWaterMark, wwaHighWaterMark) &&
+                        (!usingWwaScheduler || MSApp.isTaskScheduledAtPriorityOrHigher(wwaHighWaterMark))) {
                         // Timeslice is moving to a lower WWA priority and the host
                         //  has equally or more important work to do. Time to yield.
                         //
@@ -1242,7 +1245,7 @@ function requestDrain(priority, name) {
     priority = (+priority === priority) ? priority : Priority.min;
     priority = clampPriority(priority);
     var complete;
-    var promise = new Promise(function (c) {
+    var promise = new Promise_1.Promise(function (c) {
         complete = c;
         addDrainListener(priority, complete, name);
     }, function () {
@@ -1345,7 +1348,7 @@ function makeSchedulePromise(priority) {
         /// </returns>
         /// </signature>
         var job;
-        return new Promise(function (c) {
+        return new Promise_1.Promise(function (c) {
             job = schedule(function schedulePromise() {
                 c(promiseValue);
             }, priority, null, jobName);

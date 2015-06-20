@@ -1,10 +1,10 @@
+/// <reference path="../../../../typings/winjs/winjs.d.ts" />
+/// <reference path="../../../../typings/xhr2.d.ts" />
 'use strict';
 var _Global = require('../Core/_Global');
-var _Base = require('../Core/_Base');
-var Promise = require('../Promise');
+var Promise_1 = require('../Promise');
 var Scheduler = require('../Scheduler');
-var xr = require('xmlhttprequest');
-//import XMLHttpRequest = xhr.XMLHttpRequest;
+var XMLHttpRequestModule = require('xhr2');
 function schedule(f, arg, priority) {
     Scheduler.schedule(function xhr_callback() {
         f(arg);
@@ -27,10 +27,10 @@ function xhr(options) {
     /// </returns>
     /// </signature>
     var req;
-    return new Promise(function (c, e, p) {
+    return new Promise_1.Promise(function (c, e, p) {
         /// <returns value="c(new XMLHttpRequest())" locid="WinJS.xhr.constructor._returnValue" />
         var priority = Scheduler.currentPriority;
-        req = new xr.XMLHttpRequest();
+        req = new XMLHttpRequestModule.XMLHttpRequest();
         var isLocalRequest = false;
         var schemeMatch = schemeRegex.exec(options.url.toLowerCase());
         if (schemeMatch) {
@@ -79,7 +79,4 @@ function xhr(options) {
         req.abort();
     });
 }
-_Base.Namespace.define("WinJS", {
-    xhr: xhr
-});
-module.exports = xhr;
+exports.xhr = xhr;

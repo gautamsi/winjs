@@ -1,7 +1,9 @@
-  'use strict';
-  import _Base = require('./_Base');
-
-    var ErrorFromName = _Base.Class.derive(Error, function (name, message) {
+'use strict';
+ class ErrorFromName {
+    static supportedForProcessing: boolean = false;
+    name: string;
+    message: string;
+    constructor(name: string, message?: string) {
         /// <signature helpKeyword="WinJS.ErrorFromName">
         /// <summary locid="WinJS.ErrorFromName">
         /// Creates an Error object with the specified name and message properties.
@@ -12,16 +14,15 @@
         /// </signature>
         this.name = name;
         this.message = message || name;
-    }, {
-        /* empty */
-    }, {
-        supportedForProcessing: false,
-    });
+    }
+}
 
-    _Base.Namespace.define("WinJS", {
-        // ErrorFromName establishes a simple pattern for returning error codes.
-        //
-        ErrorFromName: ErrorFromName
-    });
 
-    export = ErrorFromName;
+// import _Base = require('./_Base');
+// _Base.Namespace.define("WinJS", {
+//     // ErrorFromName establishes a simple pattern for returning error codes.
+//     //
+//     ErrorFromName: ErrorFromName
+// });
+
+export = ErrorFromName;

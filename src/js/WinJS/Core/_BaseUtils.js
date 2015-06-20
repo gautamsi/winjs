@@ -1,12 +1,10 @@
 'use strict';
-var exports = require('exports');
 var _Global = require('./_Global');
 var _Base = require('./_Base');
 var _BaseCoreUtils = require('./_BaseCoreUtils');
 var _ErrorFromName = require('./_ErrorFromName');
-var _Resources = require('./_Resources');
 var _Trace = require('./_Trace');
-var Promise = require('../Promise');
+var Promise_1 = require('../Promise');
 var Scheduler = require('../Scheduler');
 var strings = {
     get notSupportedForProcessing() {
@@ -73,7 +71,42 @@ function getBrowserStyleEquivalents() {
     if (!_Global.document) {
         return {};
     }
-    var equivalents = {}, docStyle = _Global.document.documentElement.style, stylePrefixesToTest = ["", "webkit", "ms", "Moz"], styles = ["animation", "transition", "transform", "animation-name", "animation-duration", "animation-delay", "animation-timing-function", "animation-iteration-count", "animation-direction", "animation-fill-mode", "grid-column", "grid-columns", "grid-column-span", "grid-row", "grid-rows", "grid-row-span", "transform-origin", "transition-property", "transition-duration", "transition-delay", "transition-timing-function", "scroll-snap-points-x", "scroll-snap-points-y", "scroll-chaining", "scroll-limit", "scroll-limit-x-max", "scroll-limit-x-min", "scroll-limit-y-max", "scroll-limit-y-min", "scroll-snap-type", "scroll-snap-x", "scroll-snap-y", "touch-action", "overflow-style", "user-select"], prefixesUsedOnStyles = {};
+    var equivalents = {}, docStyle = _Global.document.documentElement.style, stylePrefixesToTest = ["", "webkit", "ms", "Moz"], styles = ["animation",
+        "transition",
+        "transform",
+        "animation-name",
+        "animation-duration",
+        "animation-delay",
+        "animation-timing-function",
+        "animation-iteration-count",
+        "animation-direction",
+        "animation-fill-mode",
+        "grid-column",
+        "grid-columns",
+        "grid-column-span",
+        "grid-row",
+        "grid-rows",
+        "grid-row-span",
+        "transform-origin",
+        "transition-property",
+        "transition-duration",
+        "transition-delay",
+        "transition-timing-function",
+        "scroll-snap-points-x",
+        "scroll-snap-points-y",
+        "scroll-chaining",
+        "scroll-limit",
+        "scroll-limit-x-max",
+        "scroll-limit-x-min",
+        "scroll-limit-y-max",
+        "scroll-limit-y-min",
+        "scroll-snap-type",
+        "scroll-snap-x",
+        "scroll-snap-y",
+        "touch-action",
+        "overflow-style",
+        "user-select" // used for Template Compiler test
+    ], prefixesUsedOnStyles = {};
     for (var i = 0, len = styles.length; i < len; i++) {
         var originalName = styles[i], styleToTest = getCamelCasedName(originalName);
         for (var j = 0, prefixLen = stylePrefixesToTest.length; j < prefixLen; j++) {
@@ -100,12 +133,12 @@ function getBrowserStyleEquivalents() {
 function getBrowserEventEquivalents() {
     var equivalents = {};
     var animationEventPrefixes = ["", "WebKit"], animationEvents = [{
-        eventObject: "TransitionEvent",
-        events: ["transitionStart", "transitionEnd"]
-    }, {
-        eventObject: "AnimationEvent",
-        events: ["animationStart", "animationEnd"]
-    }];
+            eventObject: "TransitionEvent",
+            events: ["transitionStart", "transitionEnd"]
+        }, {
+            eventObject: "AnimationEvent",
+            events: ["animationStart", "animationEnd"]
+        }];
     for (var i = 0, len = animationEvents.length; i < len; i++) {
         var eventToTest = animationEvents[i], chosenPrefix = "";
         for (var j = 0, prefixLen = animationEventPrefixes.length; j < prefixLen; j++) {
@@ -153,7 +186,7 @@ function throttledFunction(delay, fn) {
     var nextContext = null;
     var nextArgs = null;
     function makeThrottlePromise() {
-        return Promise.timeout(delay).then(function () {
+        return Promise_1.Promise.timeout(delay).then(function () {
             throttlePromise = null;
         });
     }
@@ -234,7 +267,7 @@ _Base.Namespace._moduleDefine(exports, "WinJS.Utilities", {
         /// If true, the callback is executed asynchronously.
         /// </param>
         /// </signature>
-        return new Promise(function (c, e) {
+        return new Promise_1.Promise(function (c, e) {
             function complete() {
                 if (callback) {
                     try {
@@ -323,7 +356,7 @@ _Base.Namespace._moduleDefine(exports, "WinJS.Utilities", {
             if (supportedForProcessing) {
                 return value;
             }
-            throw new _ErrorFromName("WinJS.Utilities.requireSupportedForProcessing", _Resources._formatString(strings.notSupportedForProcessing, value));
+            throw new _ErrorFromName("WinJS.Utilities.requireSupportedForProcessing"); // _Resources._formatString(strings.notSupportedForProcessing, value));
         },
         configurable: false,
         writable: false,

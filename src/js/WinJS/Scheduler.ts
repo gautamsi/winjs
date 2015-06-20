@@ -7,7 +7,7 @@
   //import _Resources = require('./Core/_Resources');
   import _Trace = require('./Core/_Trace');
   import _WriteProfilerMark = require('./Core/_WriteProfilerMark');
-  import Promise = require('./Promise');
+  import {Promise} from './Promise';
 
   //export enum Priority {
   //    max= 15,

@@ -204,8 +204,7 @@ var initializeProperties = function (target, members, prefix) {
         /// The newly-defined class.
         /// </returns>
         /// </signature>
-        constructor = constructor || function () {
-        };
+        constructor = constructor || function () { };
         _BaseCoreUtils.markSupportedForProcessing(constructor);
         if (instanceMembers) {
             initializeProperties(constructor.prototype, instanceMembers);
@@ -237,8 +236,7 @@ var initializeProperties = function (target, members, prefix) {
         /// </returns>
         /// </signature>
         if (baseClass) {
-            constructor = constructor || function () {
-            };
+            constructor = constructor || function () { };
             var basePrototype = baseClass.prototype;
             constructor.prototype = Object.create(basePrototype);
             _BaseCoreUtils.markSupportedForProcessing(constructor);
@@ -268,8 +266,7 @@ var initializeProperties = function (target, members, prefix) {
         /// The newly-defined class.
         /// </returns>
         /// </signature>
-        constructor = constructor || function () {
-        };
+        constructor = constructor || function () { };
         var i, len;
         for (i = 1, len = arguments.length; i < len; i++) {
             initializeProperties(constructor.prototype, arguments[i]);

@@ -23,7 +23,9 @@ function format(message, tag, type) {
     if (typeof (m) === "function") {
         m = m();
     }
-    return ((type && typeR.test(type)) ? ("") : (type ? (type + ": ") : "")) + (tag ? tag.replace(spaceR, ":") + ": " : "") + m;
+    return ((type && typeR.test(type)) ? ("") : (type ? (type + ": ") : "")) +
+        (tag ? tag.replace(spaceR, ":") + ": " : "") +
+        m;
 }
 function defAction(message, tag, type) {
     var m = _exports.formatLog(message, tag, type);
@@ -70,7 +72,9 @@ _Base.Namespace._moduleDefine(undefined || _Global, "WinJS.Utilities", {
             return;
         }
         var result = function (message, tag, type) {
-            if (!((el && !el.test(type)) || (not && not.test(tag)) || (has && !has.test(tag)))) {
+            if (!((el && !el.test(type)) // if the expected log level is not satisfied
+                || (not && not.test(tag)) // if any of the excluded categories exist
+                || (has && !has.test(tag)))) {
                 action(message, tag, type);
             }
             result.next && result.next(message, tag, type);

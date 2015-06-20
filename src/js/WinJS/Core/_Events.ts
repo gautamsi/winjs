@@ -49,45 +49,46 @@ function createEventProperties(...arg: any[]): any {
   return props;
 }
 
-var EventMixinEvent = _Base.Class.define(
-  function EventMixinEvent_ctor(type, detail, target) {
+class EventMixinEvent {
+  static supportedForProcessing: boolean = false;
+  
+  _preventDefaultCalled: boolean = false;
+  _stopImmediatePropagationCalled:boolean = false;
+  detail: any = null;
+  bubbles: any = { value: false, writable: false };
+  cancelable: any = { value: false, writable: false };
+  get currentTarget(): any { return this.target; }
+  get defaultPrevented(): boolean { return this._preventDefaultCalled; }
+  trusted: any = { value: false, writable: false };
+  eventPhase: any = { value: 0, writable: false };
+  target: any = null;
+  timeStamp: any = null;
+  type: any = null;
+
+  constructor(type, detail, target) {
     this.detail = detail;
     this.target = target;
     this.timeStamp = Date.now();
     this.type = type;
-  },
-  {
-    bubbles: { value: false, writable: false },
-    cancelable: { value: false, writable: false },
-    currentTarget: {
-      get: function() { return this.target; }
-    },
-    defaultPrevented: {
-      get: function() { return this._preventDefaultCalled; }
-    },
-    trusted: { value: false, writable: false },
-    eventPhase: { value: 0, writable: false },
-    target: null,
-    timeStamp: null,
-    type: null,
-
-    preventDefault: function() {
-      this._preventDefaultCalled = true;
-    },
-    stopImmediatePropagation: function() {
-      this._stopImmediatePropagationCalled = true;
-    },
-    stopPropagation: function() {
-    }
-  }, {
-    supportedForProcessing: false,
   }
-  );
 
-var eventMixin = {
-  _listeners: null,
 
-  addEventListener: function(type, listener, useCapture) {
+  preventDefault() {
+    this._preventDefaultCalled = true;
+  }
+  stopImmediatePropagation() {
+    this._stopImmediatePropagationCalled = true;
+  }
+  stopPropagation() {
+  }
+}
+
+class EventListener {
+  static supportedForProcessing: boolean = false;
+
+  _listeners: any = null;
+
+  addEventListener(type, listener, useCapture) {
     /// <signature helpKeyword="WinJS.Utilities.eventMixin.addEventListener">
     /// <summary locid="WinJS.Utilities.eventMixin.addEventListener">
     /// Adds an event listener to the control.
@@ -112,8 +113,8 @@ var eventMixin = {
       }
     }
     eventListeners.push({ listener: listener, useCapture: useCapture });
-  },
-  dispatchEvent: function(type, details) {
+  }
+  dispatchEvent(type, details) {
     /// <signature helpKeyword="WinJS.Utilities.eventMixin.dispatchEvent">
     /// <summary locid="WinJS.Utilities.eventMixin.dispatchEvent">
     /// Raises an event of the specified type and with the specified additional properties.
@@ -139,8 +140,8 @@ var eventMixin = {
       return eventValue.defaultPrevented || false;
     }
     return false;
-  },
-  removeEventListener: function(type, listener?, useCapture?) {
+  }
+  removeEventListener(type, listener?, useCapture?) {
     /// <signature helpKeyword="WinJS.Utilities.eventMixin.removeEventListener">
     /// <summary locid="WinJS.Utilities.eventMixin.removeEventListener">
     /// Removes an event listener from the control.
@@ -171,11 +172,13 @@ var eventMixin = {
       }
     }
   }
-};
+}
+
 var _export = {
   _createEventProperty: createEventProperty,
   createEventProperties: createEventProperties,
-  eventMixin: eventMixin
+  eventMixin: EventListener,
+  EventListener:EventListener
 };
-_Base.Namespace._moduleDefine(undefined, "WinJS.Utilities", _export);
+//_Base.Namespace._moduleDefine(undefined, "WinJS.Utilities", _export);
 export = _export;

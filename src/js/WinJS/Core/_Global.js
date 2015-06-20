@@ -5,5 +5,6 @@
 //    define(global);
 //}(this));
 'use strict';
-var _global =  global || window;
+var window = window || undefined;
+var _global = window || global;
 module.exports = _global;
